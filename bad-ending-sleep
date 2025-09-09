@@ -4,6 +4,11 @@
     <head>
         <title>Good Ending???</title>
     </head>
+    <style>
+            body {
+                background-color: rgb(255, 0, 200);
+            }
+        </style>
     <body>
         <p><h1>You sit back down.</p>Too bad you didn't get out of class, but at least you didn't get in trouble sooo...Is that a win? I have no clue. <p>Good Ending???</p></h1>
 </html>
