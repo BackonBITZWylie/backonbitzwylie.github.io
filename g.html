@@ -82,7 +82,7 @@
       </div>
     </div>
 
-    <div class="small" style="margin-top:8px">Editor: pick a tool and click the canvas. Level select supports loading custom levels saved to localStorage.</div>
+    <div class="small" style="margin-top:8px">Have Fun!</div>
   </div>
 
 <script>
@@ -121,7 +121,7 @@ class Player {
   constructor(x,y){
     this.x=x; this.y=y; this.w=36; this.h=48;
     this.vx=0; this.vy=0; this.onGround=false;
-    this.jumpPower = 14; this.speed=3.5;
+    this.jumpPower = 13; this.speed=3.5;
     this.respawn = {x:x,y:y};
   }
   resetToStart(sx,sy){ this.x=sx; this.y=sy; this.vx=0; this.vy=0; this.onGround=false; this.respawn={x:sx,y:sy}; }
@@ -160,10 +160,12 @@ class Player {
       }
     }
 
-    // bounds
-    if(this.x < -200) this.x = -200;
-    if(this.x + this.w > level.width + 200) this.x = level.width + 200 - this.w;
-    if(this.y > H + 400){ // fell off
+    // bounds: keep inside world
+    if(this.x < 0) this.x = 0;
+    if(this.x + this.w > level.width) this.x = level.width - this.w;
+
+    // if fall below bottom of screen -> Lose a life
+    if(this.y > H + 200){
       loseLife();
     }
   }
@@ -188,6 +190,16 @@ class Enemy {
     if(this.dead) return;
     this.x += this.speed * this.dir * dt;
 
+    // keep enemies inside world
+    if(this.x < 0) {
+      this.x=0
+      this.dir = 1;
+    }
+      if(this.x + this.w > level.width) {
+        this.x = level.width - this.w;
+        this.dir = -1;
+      }
+    
     // collide with blocks: reverse
     for(const b of level.platforms){
       if(aabb(this,b)){
