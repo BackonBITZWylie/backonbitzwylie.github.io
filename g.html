@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Platformer Game</title>
+<style>
+  :root{
+    --bg:#071021; --panel:#0f1724; --text:#e6eefb;
+    --accent:#6ee7b7; --danger:#ff6b6b; --gold:#f1c40f;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071021 0%, #0b1220 100%);color:var(--text);display:flex;align-items:center;justify-content:center}
+  .wrap{width:1000px;max-width:98vw;padding:20px;box-sizing:border-box}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:18px;margin:0}
+  button{background:#111827;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+  canvas{display:block;width:100%;height:auto;border-radius:8px;background:#6ea9ff0a}
+  .small{font-size:13px;color:#9fb0d7}
+  .hud{display:flex;gap:12px;align-items:center}
+  .editor-panel{position:absolute;right:22px;top:82px;background:rgba(5,10,20,0.9);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+  .editor-panel button{display:block;margin:6px 0;width:120px}
+  .menu{position:absolute;inset:0;background:rgba(2,6,23,0.88);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+  .menu button{min-width:160px}
+  .level-grid{display:flex;flex-wrap:wrap;gap:8px;max-width:640px;justify-content:center}
+  .mini-hint{font-size:12px;color:#9fb0d7;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>My Platformer game!</h1>
+      <div class="hud">
+        <div id="hudScore">Score: 0</div>
+        <div id="hudLives">Lives: 3</div>
+        <div id="hudLevel">Level: 1 / 10</div>
+        <button id="btnMenu">Menu</button>
+      </div>
+    </header>
+
+    <div style="position:relative">
+      <canvas id="game" width="960" height="540"></canvas>
+
+      <!-- Editor controls (toggle visible) -->
+      <div id="editorPanel" class="editor-panel" style="display:none">
+        <div style="font-weight:600;margin-bottom:6px">Level Editor</div>
+        <button id="toolBlock">Block</button>
+        <button id="toolCoin">Coin</button>
+        <button id="toolEnemy">Enemy</button>
+        <button id="toolGoal">Goal</button>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.04);margin:8px 0">
+        <button id="saveLevel">Save Level</button>
+        <button id="playLevel">Play Level</button>
+        <button id="saveLocal">Save to Local</button>
+        <button id="loadLocal">Load Local</button>
+        <button id="editorMenu">Back to Menu</button>
+        <div class="mini-hint">Click canvas to place. Blocks snap to grid.</div>
+      </div>
+
+      <!-- Menu overlay -->
+      <div id="menuScreen" class="menu">
+        <h1 style="margin:0 0 8px 0">Play my game!</h1>
+        <div style="display:flex;gap:12px">
+          <button id="startBtn">Start Game</button>
+          <button id="editorBtn">Level Editor</button>
+          <button id="selectBtn">Select Level</button>
+        </div>
+        <div class="mini-hint">Use ← → to move, ↑ or Space to jump. Stomp enemies to kill them.</div>
+      </div>
+
+      <!-- Level select overlay -->
+      <div id="levelSelect" class="menu" style="display:none">
+        <h2>Select a Level</h2>
+        <div id="levelButtons" class="level-grid"></div>
+        <button id="backFromSelect">Back</button>
+      </div>
+
+      <!-- End screen -->
+      <div id="endScreen" class="menu" style="display:none">
+        <h2>Good Job!</h2>
+        <div id="finalScoreText"></div>
+        <button id="backToMenuAfterEnd">Main Menu</button>
+      </div>
+    </div>
+
+    <div class="small" style="margin-top:8px">Editor: pick a tool and click the canvas. Level select supports loading custom levels saved to localStorage.</div>
+  </div>
+
+<script>
+/* ------------ CONFIG ------------ */
+const GRID = 48;
+const CANVAS = document.getElementById('game');
+const ctx = CANVAS.getContext('2d');
+const W = CANVAS.width, H = CANVAS.height;
+const HUD_SCORE = document.getElementById('hudScore');
+const HUD_LIVES = document.getElementById('hudLives');
+const HUD_LEVEL = document.getElementById('hudLevel');
+/* -------------------------------- */
+
+/* ---------- State ---------- */
+let state = 'menu'; // menu, playing, editor, select, end
+let currentLevelIndex = 0;
+let levels = [];        // arrays of objects
+let player = null;
+let camera = {x:0,y:0,w:W,h:H};
+let keys = {};
+let editorVisible = false;
+let editingLevel = [];  // temp array for placement in editor
+let editorTool = 'block'; // block, coin, enemy, goal
+let score = 0;
+let lives = 3;
+let maxLevels = 10;
+/* --------------------------- */
+
+/* --------- helpers --------- */
+function aabb(a,b){ return !(a.x + a.w <= b.x || a.x >= b.x + b.w || a.y + a.h <= b.y || a.y >= b.y + b.h); }
+function clamp(a,min,max){ return Math.max(min,Math.min(max,a)); }
+/* --------------------------- */
+
+/* ------- Entity classes ------- */
+class Player {
+  constructor(x,y){
+    this.x=x; this.y=y; this.w=36; this.h=48;
+    this.vx=0; this.vy=0; this.onGround=false;
+    this.jumpPower = 14; this.speed=3.5;
+    this.respawn = {x:x,y:y};
+  }
+  resetToStart(sx,sy){ this.x=sx; this.y=sy; this.vx=0; this.vy=0; this.onGround=false; this.respawn={x:sx,y:sy}; }
+  update(dt,level){
+    // controls
+    if(keys.left) this.vx = Math.max(this.vx - 0.4*dt, -this.speed);
+    if(keys.right) this.vx = Math.min(this.vx + 0.4*dt, this.speed);
+    if(!keys.left && !keys.right) this.vx *= 0.86;
+
+    // jump
+    if((keys.jumpPressed) && this.onGround){ this.vy = -this.jumpPower; this.onGround=false; }
+    // gravity
+    this.vy += 0.4*dt;
+
+    // integrate
+    this.x += this.vx * dt;
+    // horizontal collisions
+    for(const p of level.platforms){
+      if(aabb(this, p)){
+        if(this.vx > 0) this.x = p.x - this.w - 0.01;
+        else if(this.vx < 0) this.x = p.x + p.w + 0.01;
+        this.vx = 0;
+      }
+    }
+
+    this.y += this.vy * dt;
+    this.onGround = false;
+    for(const p of level.platforms){
+      if(aabb(this, p)){
+        const prevY = this.y - this.vy*dt;
+        if(prevY + this.h <= p.y + 2){
+          this.y = p.y - this.h; this.vy = 0; this.onGround = true;
+        } else {
+          if(this.vy < 0){ this.y = p.y + p.h + 0.01; this.vy = 0; }
+        }
+      }
+    }
+
+    // bounds
+    if(this.x < -200) this.x = -200;
+    if(this.x + this.w > level.width + 200) this.x = level.width + 200 - this.w;
+    if(this.y > H + 400){ // fell off
+      loseLife();
+    }
+  }
+  draw(){
+    // simple sprite: blue rectangle with small eye
+    ctx.save();
+    ctx.translate(Math.round(this.x), Math.round(this.y));
+    ctx.fillStyle = '#2d9cdb';
+    roundRect(ctx,0,0,this.w,this.h,6); ctx.fill();
+    ctx.fillStyle = '#07263a'; ctx.fillRect(this.w - 14, 10, 6, 6);
+    ctx.restore();
+  }
+}
+
+class Enemy {
+  constructor(x,y){
+    this.x=x; this.y=y; this.w=36; this.h=36;
+    this.speed = 1.2 + Math.random()*0.8; this.dir = Math.random()<0.5?-1:1;
+    this.dead=false;
+  }
+  update(dt, level){
+    if(this.dead) return;
+    this.x += this.speed * this.dir * dt;
+
+    // collide with blocks: reverse
+    for(const b of level.platforms){
+      if(aabb(this,b)){
+        this.dir *= -1;
+        this.x += this.speed * this.dir * dt * 2; // step back
+        break;
+      }
+    }
+
+    // collide with other enemies: simple bounce
+    for(const other of level.enemies){
+      if(other === this || other.dead) continue;
+      if(aabb(this, other)){
+        // push them apart and swap directions
+        if(this.x < other.x) { this.dir = -1; other.dir = 1; }
+        else { this.dir = 1; other.dir = -1; }
+      }
+    }
+  }
+  draw(){
+    if(this.dead) return;
+    ctx.save();
+    ctx.translate(Math.round(this.x), Math.round(this.y));
+    // red enemy block with eye
+    ctx.fillStyle = '#e74c3c';
+    roundRect(ctx,0,0,this.w,this.h,6); ctx.fill();
+    ctx.fillStyle='#3a0f0f'; ctx.fillRect(8,10,8,6);
+    ctx.restore();
+  }
+}
+
+class Coin {
+  constructor(x,y){
+    this.x=x; this.y=y; this.w=18; this.h=18; this.collected=false; this.tick= Math.random()*60;
+  }
+  update(dt){ this.tick += dt; }
+  draw(){
+    if(this.collected) return;
+    ctx.save(); ctx.translate(this.x, this.y);
+    // gold coin (circle) with shine
+    ctx.fillStyle = '#f1c40f';
+    ctx.beginPath(); ctx.arc(this.w/2, this.h/2, this.w/2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.beginPath(); ctx.ellipse(this.w/2 - 3, this.h/2 - 4, 4, 2.5, 0, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* --------- Level structure --------- */
+function makeEmptyLevel(width){
+  return {
+    width: width,
+    platforms: [], // objects {x,y,w,h}
+    coins: [],     // Coin objects
+    enemies: [],   // Enemy objects
+    goal: null,
+    playerStart: {x:60, y: 300}
+  };
+}
+
+function generateProceduralLevels(num){
+  const out = [];
+  for(let i=0;i<num;i++){
+    const L = makeEmptyLevel(2400 + i*400); // moderate increase
+    // ground across width
+    for(let gx=0; gx < Math.ceil(L.width / GRID); gx++){
+      L.platforms.push({x: gx*GRID, y: 500, w: GRID, h: 40});
+    }
+    // platforms throughout
+    const platformCount = 18 + Math.floor(i*2);
+    let x = 120;
+    for(let p=0;p<platformCount;p++){
+      const w = GRID * (1 + Math.floor(Math.random()*3)); // 48-192
+      const y = 320 - Math.floor(Math.sin(p*0.9+i)*60) - Math.floor(Math.random()*80);
+      L.platforms.push({x:x, y:y, w:w, h:18});
+      // coins above platform
+      if(Math.random() < 0.9){
+        L.coins.push(new Coin(x + Math.floor(Math.random()*(w-24)), y - 32));
+      }
+      // maybe an enemy on the platform
+      if(Math.random() < 0.6){
+        L.enemies.push(new Enemy(x + 8, y - 36));
+      }
+      x += 160 + Math.floor(Math.random()*160);
+      if(x > L.width - 220) x = 220 + Math.floor(Math.random()*40);
+    }
+    // extra scattered enemies/coins
+    for(let c=0;c<6 + i;c++){
+      const px = 200 + Math.random()*(L.width - 400);
+      const py = 200 + Math.random()*260;
+      if(Math.random() < 0.6) L.coins.push(new Coin(px, py));
+      if(Math.random() < 0.5) L.enemies.push(new Enemy(px, py));
+    }
+    // goal near the end
+    L.goal = {x: L.width - 120, y: 450, w:36, h:64};
+    out.push(L);
+  }
+  return out;
+}
+
+/* ---------- Game flow ---------- */
+function init(){
+  // create levels
+  levels = generateProceduralLevels(maxLevels);
+
+  // set initial player and HUD
+  player = new Player(levels[0].playerStart.x, levels[0].playerStart.y);
+  score = 0; lives = 3;
+  updateHUD();
+
+  // UI wiring
+  document.getElementById('startBtn').onclick = ()=> { closeAllOverlays(); startLevel(0); };
+  document.getElementById('editorBtn').onclick = ()=> { openEditorUI(); };
+  document.getElementById('selectBtn').onclick = ()=> { openLevelSelect(); };
+  document.getElementById('btnMenu').onclick = ()=> { showMenu(); };
+  document.getElementById('toolBlock').onclick = ()=> { editorTool='block'; };
+  document.getElementById('toolCoin').onclick = ()=> { editorTool='coin'; };
+  document.getElementById('toolEnemy').onclick = ()=> { editorTool='enemy'; };
+  document.getElementById('toolGoal').onclick = ()=> { editorTool='goal'; };
+  document.getElementById('saveLevel').onclick = ()=> { saveEditorLevel(); };
+  document.getElementById('playLevel').onclick = ()=> { playEditorLevel(); };
+  document.getElementById('saveLocal').onclick = ()=> { localStorage.setItem('customLevels', JSON.stringify(serializableLevels(levels))); alert('Saved to localStorage'); };
+  document.getElementById('loadLocal').onclick = ()=> { loadFromLocal(); };
+  document.getElementById('editorMenu').onclick = ()=> { backToMenuFromEditor(); };
+  document.getElementById('backFromSelect').onclick = ()=> { backToMenuFromLevelSelect(); };
+  document.getElementById('backToMenuAfterEnd').onclick = ()=> { showMenu(); };
+
+  // build level select buttons
+  rebuildLevelSelect();
+
+  // input
+  window.addEventListener('keydown', e=>{
+    if(e.code === 'ArrowLeft') keys.left = true;
+    if(e.code === 'ArrowRight') keys.right = true;
+    if(e.code === 'ArrowUp') keys.jumpPressed = true;
+    if(e.code === 'Space') keys.jumpPressed = true;
+    if(e.code === 'KeyA') keys.left = true;
+    if(e.code === 'KeyD') keys.right = true;
+    if(e.code === 'KeyW') keys.jumpPressed = true;
+    if(e.code === 'KeyR') restartLevel();
+  }, false);
+  window.addEventListener('keyup', e=>{
+    if(e.code === 'ArrowLeft') keys.left = false;
+    if(e.code === 'ArrowRight') keys.right = false;
+    if(e.code === 'ArrowUp') keys.jumpPressed = false;
+    if(e.code === 'Space') keys.jumpPressed = false;
+    if(e.code === 'KeyA') keys.left = false;
+    if(e.code === 'KeyD') keys.right = false;
+    if(e.code === 'KeyW') keys.jumpPressed = false;
+  }, false);
+
+  // editor canvas clicks
+  CANVAS.addEventListener('pointerdown', onCanvasPointer);
+
+  // start render loop
+  last = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function updateHUD(){
+  HUD_SCORE.textContent = 'Score: ' + score;
+  HUD_LIVES.textContent = 'Lives: ' + lives;
+  HUD_LEVEL.textContent = 'Level: ' + (currentLevelIndex+1) + ' / ' + levels.length;
+}
+
+/* ------------ level selection & editor ------------- */
+function rebuildLevelSelect(){
+  const container = document.getElementById('levelButtons');
+  container.innerHTML = '';
+  for(let i=0;i<levels.length;i++){
+    const btn = document.createElement('button');
+    btn.textContent = 'Level ' + (i+1);
+    btn.style.minWidth = '82px';
+    btn.onclick = ()=> { closeAllOverlays(); startLevel(i); };
+    container.appendChild(btn);
+  }
+}
+
+function openLevelSelect(){
+  closeAllOverlays();
+  document.getElementById('levelSelect').style.display = 'flex';
+  state = 'select';
+}
+
+function closeAllOverlays(){
+  document.getElementById('menuScreen').style.display = 'none';
+  document.getElementById('editorPanel').style.display = 'none';
+  document.getElementById('levelSelect').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'none';
+}
+
+function showMenu(){
+  closeAllOverlays();
+  document.getElementById('menuScreen').style.display = 'flex';
+  state = 'menu';
+}
+
+function openEditorUI(){
+  closeAllOverlays();
+  document.getElementById('editorPanel').style.display = 'block';
+  document.getElementById('menuScreen').style.display = 'none';
+  state = 'editor';
+  editingLevel = []; // start blank
+}
+
+function backToMenuFromEditor(){
+  closeAllOverlays();
+  document.getElementById('menuScreen').style.display = 'flex';
+  document.getElementById('editorPanel').style.display = 'none';
+  state = 'menu';
+}
+
+/* Editor placement handler */
+function onCanvasPointer(e){
+  const rect = CANVAS.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) + camera.x; // world x
+  const my = (e.clientY - rect.top) + camera.y;  // world y
+
+  if(state === 'editor'){
+    const gx = Math.floor(mx / GRID) * GRID;
+    const gy = Math.floor(my / GRID) * GRID;
+    if(editorTool === 'block'){
+      editingLevel.push({type:'block', x:gx, y:gy, w:GRID, h:GRID});
+    } else if(editorTool === 'coin'){
+      editingLevel.push({type:'coin', x:gx + 8, y:gy + 8});
+    } else if(editorTool === 'enemy'){
+      editingLevel.push({type:'enemy', x:gx + 6, y:gy + 6});
+    } else if(editorTool === 'goal'){
+      // only one goal - remove earlier
+      editingLevel = editingLevel.filter(it=>it.type !== 'goal');
+      editingLevel.push({type:'goal', x:gx, y:gy});
+    }
+  }
+}
+
+/* Save & play editor level */
+function serializableLevels(levelArr){
+  // convert classes to simple objects for storage
+  return levelArr.map(l=>{
+    return {
+      width: l.width,
+      platforms: l.platforms,
+      coins: l.coins.map(c => ({x:c.x,y:c.y,collected:!!c.collected})),
+      enemies: l.enemies.map(e => ({x:e.x,y:e.y,dir:e.dir,speed:e.speed})),
+      goal: l.goal,
+      playerStart: l.playerStart
+    };
+  });
+}
+
+function saveEditorLevel(){
+  // build proper level object from editingLevel
+  const L = makeEmptyLevel(Math.max(1200, 800)); // default width
+  // ground
+  for(let gx=0; gx < Math.ceil(L.width / GRID); gx++){
+    L.platforms.push({x: gx*GRID, y: 500, w: GRID, h: 40});
+  }
+  // place items
+  for(const it of editingLevel){
+    if(it.type === 'block') L.platforms.push({x:it.x,y:it.y,w:GRID,h:GRID});
+    else if(it.type === 'coin') L.coins.push(new Coin(it.x, it.y));
+    else if(it.type === 'enemy') L.enemies.push(new Enemy(it.x, it.y));
+    else if(it.type === 'goal') L.goal = {x:it.x, y: it.y, w:36, h:64};
+  }
+  // ensure a goal exists
+  if(!L.goal) L.goal = {x: L.width - 120, y: 450, w:36, h:64};
+  levels.push(L);
+  rebuildLevelSelect();
+  alert('Saved level to memory. Use "Select Level" to play or Save to Local to persist.');
+}
+
+function playEditorLevel(){
+  saveEditorLevel();
+  const idx = levels.length - 1;
+  closeAllOverlays();
+  startLevel(idx);
+}
+
+function loadFromLocal(){
+  const raw = localStorage.getItem('customLevels');
+  if(!raw){ alert('No saved levels found in localStorage'); return; }
+  try{
+    const arr = JSON.parse(raw);
+    const loaded = arr.map(obj => {
+      const L = makeEmptyLevel(obj.width || 2400);
+      L.platforms = obj.platforms || [];
+      L.coins = (obj.coins || []).map(c => { const cobj = new Coin(c.x, c.y); cobj.collected = c.collected; return cobj; });
+      L.enemies = (obj.enemies || []).map(e=> { const en = new Enemy(e.x, e.y); en.dir = e.dir || 1; en.speed = e.speed || en.speed; return en; });
+      L.goal = obj.goal || {x:L.width - 120, y:450, w:36, h:64};
+      L.playerStart = obj.playerStart || {x:60,y:300};
+      return L;
+    });
+    levels = loaded;
+    rebuildLevelSelect();
+    alert('Loaded custom levels');
+  } catch(err){
+    alert('Failed to load levels: ' + err);
+  }
+}
+
+/* ---------- Level start / restart / progression ---------- */
+function startLevel(i){
+  currentLevelIndex = clamp(i, 0, levels.length-1);
+  const L = levels[currentLevelIndex];
+  // ensure coin/enemy objects are instances
+  L.coins = L.coins.map(c => (c instanceof Coin) ? c : new Coin(c.x, c.y));
+  L.enemies = L.enemies.map(e => (e instanceof Enemy) ? e : new Enemy(e.x, e.y));
+  if(!L.goal) L.goal = {x:L.width - 120, y:450, w:36, h:64};
+  // player
+  player.resetToStart(L.playerStart.x, L.playerStart.y);
+  player.respawn = {x:L.playerStart.x, y:L.playerStart.y};
+  score = 0;
+  lives = 3;
+  updateHUD();
+  state = 'playing';
+}
+
+function restartLevel(){
+  startLevel(currentLevelIndex);
+}
+
+function loseLife(){
+  lives--; updateHUD();
+  if(lives <= 0){
+    // game over -> back to menu
+    alert('Game Over - returning to menu');
+    showMenu();
+  } else {
+    // respawn player
+    const L = levels[currentLevelIndex];
+    player.x = L.playerStart.x; player.y = L.playerStart.y; player.vx=0; player.vy=0;
+  }
+}
+
+/* --------- Game loop & physics --------- */
+let last = 0;
+function loop(now){
+  const dt = clamp((now - last) / 16.6667, 0, 4); // scale to ~60fps steps
+  last = now;
+
+  if(state === 'playing'){
+    step(dt);
+    render();
+  } else if(state === 'editor'){
+    renderEditor();
+  } else {
+    renderMenuDecor(); // menu / select / end => show a simple animated backdrop
+  }
+
+  // reset instantaneous keys
+  keys.jumpPressed = false;
+
+  requestAnimationFrame(loop);
+}
+
+/* Game step when playing */
+function step(dt){
+  const L = levels[currentLevelIndex];
+  // update player
+  player.update(dt, L);
+
+  // update enemies
+  for(const e of L.enemies){
+    e.update(dt, L);
+  }
+
+  // resolve enemy-enemy collisions more thoroughly (prevent overlapping)
+  for(let i=0;i<L.enemies.length;i++){
+    for(let j=i+1;j<L.enemies.length;j++){
+      const a = L.enemies[i], b = L.enemies[j];
+      if(a.dead || b.dead) continue;
+      if(aabb(a,b)){
+        // simple separation: push them apart horizontally
+        const overlap = (a.x + a.w) - b.x;
+        const mid = (a.x + a.w/2) - (b.x + b.w/2);
+        if(mid > 0){ a.x += 4; b.x -= 4; a.dir = 1; b.dir = -1; }
+        else { a.x -= 4; b.x += 4; a.dir = -1; b.dir = 1; }
+      }
+    }
+  }
+
+  // coins collision
+  for(const coin of L.coins){
+    if(coin.collected) continue;
+    if(player.x < coin.x + coin.w && player.x + player.w > coin.x && player.y < coin.y + coin.h && player.y + player.h > coin.y){
+      coin.collected = true;
+      score += 10;
+      updateHUD();
+    }
+  }
+
+  // enemies vs player
+  for(const e of L.enemies.slice()){
+    if(e.dead) continue;
+    if(aabb(player, e)){
+      // if falling (vy > 0) and player's bottom is above enemy's mid -> stomp
+      if(player.vy > 0 && (player.y + player.h - 6) < (e.y + e.h/2)){
+        // stomp
+        e.dead = true;
+        const idx = L.enemies.indexOf(e);
+        if(idx >= 0) L.enemies.splice(idx,1);
+        player.vy = -8;
+        score += 50;
+        updateHUD();
+      } else {
+        // hurt
+        loseLife();
+        break;
+      }
+    }
+  }
+
+  // check goal
+  const g = L.goal;
+  if(g && player.x < g.x + g.w && player.x + player.w > g.x && player.y < g.y + g.h && player.y + player.h > g.y){
+    // advance
+    currentLevelIndex++;
+    if(currentLevelIndex >= levels.length){
+      // finished all levels
+      state = 'end';
+      document.getElementById('endScreen').style.display = 'flex';
+      document.getElementById('finalScoreText').innerText = 'Final Score: ' + score;
+    } else {
+      startLevel(currentLevelIndex);
+    }
+  }
+
+  // camera follow (smooth)
+  const targetX = player.x + player.w/2 - W/2;
+  camera.x += (targetX - camera.x) * 0.12;
+  camera.x = clamp(camera.x, 0, L.width - W);
+}
+
+/* ---------- Rendering ---------- */
+function render(){
+  const L = levels[currentLevelIndex];
+  // background
+  ctx.clearRect(0,0,W,H);
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#8fc9ff'); g.addColorStop(1,'#6aa7e7');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  // parallax sky elements (simple)
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  for(let i=0;i<30;i++){
+    const sx = ((i*73) - camera.x*0.08) % (W+200);
+    ctx.fillRect((sx+W+200)% (W+200) - 100, 40 + (i%8)*14, 2, 2);
+  }
+
+  ctx.save(); ctx.translate(-camera.x, -camera.y);
+
+  // platforms (blocks)
+  for(const p of L.platforms){
+    // block body
+    ctx.fillStyle = '#2e7d32';
+    roundRect(ctx, Math.round(p.x), Math.round(p.y), Math.round(p.w), Math.round(p.h), 6);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.stroke();
+  }
+
+  // coins
+  for(const c of L.coins){
+    c.draw();
+  }
+
+  // enemies
+  for(const e of L.enemies){
+    e.draw();
+  }
+
+  // goal (flag)
+  if(L.goal){
+    // flag pole
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillRect(L.goal.x + 16, L.goal.y - 36, 4, 36);
+    // flag
+    ctx.fillStyle = '#2ecc71';
+    ctx.beginPath(); ctx.moveTo(L.goal.x + 20, L.goal.y - 36); ctx.lineTo(L.goal.x + 48, L.goal.y - 22); ctx.lineTo(L.goal.x + 20, L.goal.y - 10); ctx.closePath(); ctx.fill();
+  }
+
+  // player
+  player.draw();
+
+  ctx.restore();
+
+  // HUD overlay box
+  ctx.fillStyle = 'rgba(3,7,20,0.7)'; ctx.fillRect(12,12,260,64);
+  ctx.fillStyle = '#dfefff'; ctx.font = '15px system-ui'; ctx.fillText('Score: ' + score, 22, 34);
+  ctx.fillText('Lives: ' + lives, 22, 54);
+  ctx.fillStyle = '#9fb0d7'; ctx.font = '12px system-ui'; ctx.fillText('Level ' + (currentLevelIndex+1) + ' / ' + levels.length, 120, 54);
+
+  // minimap
+  renderMiniMap(L);
+}
+
+/* Draw a small minimap at top-right, showing player, enemies, coins, goal */
+function renderMiniMap(level){
+  const mapW = 200, mapH = 28;
+  const x = W - mapW - 12, y = 12;
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(x,y,mapW,mapH);
+  const mapScale = mapW / Math.max(1, level.width);
+  // coins (gold)
+  for(const c of level.coins){
+    if(c.collected) continue;
+    const cx = x + Math.round(c.x * mapScale);
+    ctx.fillStyle = '#f1c40f';
+    ctx.fillRect(cx, y + 6, 3, mapH - 12);
+  }
+  // enemies (red)
+  for(const e of level.enemies){
+    const ex = x + Math.round(e.x * mapScale);
+    ctx.fillStyle = '#e74c3c';
+    ctx.fillRect(ex, y + 6, 3, mapH - 12);
+  }
+  // goal (green)
+  if(level.goal){
+    const gx = x + Math.round(level.goal.x * mapScale);
+    ctx.fillStyle = '#2ecc71';
+    ctx.fillRect(gx, y + 4, 4, mapH - 8);
+  }
+  // player (blue)
+  const px = x + Math.round(player.x * mapScale);
+  ctx.fillStyle = '#2d9cdb';
+  ctx.fillRect(px - 2, y + 4, 4, mapH - 8);
+
+  // border
+  ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.strokeRect(x,y,mapW,mapH);
+}
+
+/* Editor rendering */
+function renderEditor(){
+  // background
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#111622'; ctx.fillRect(0,0,W,H);
+
+  // draw a ground grid & preview of editingLevel
+  for(let gx=0; gx < Math.ceil(W / GRID) + 10; gx++){
+    ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.beginPath();
+    ctx.moveTo(gx*GRID - (camera.x % GRID), 0); ctx.lineTo(gx*GRID - (camera.x % GRID), H); ctx.stroke();
+  }
+
+  // draw current editing objects (snapped grid)
+  for(const it of editingLevel){
+    if(it.type === 'block'){
+      ctx.fillStyle = '#2e7d32';
+      roundRect(ctx, it.x - camera.x, it.y - camera.y, GRID, GRID, 6); ctx.fill();
+    } else if(it.type === 'coin'){
+      ctx.fillStyle = '#f1c40f'; ctx.beginPath();
+      ctx.arc(it.x + 9 - camera.x, it.y + 9 - camera.y, 9,0,Math.PI*2); ctx.fill();
+    } else if(it.type === 'enemy'){
+      ctx.fillStyle = '#e74c3c'; roundRect(ctx, it.x - camera.x, it.y - camera.y, 36,36,6); ctx.fill();
+    } else if(it.type === 'goal'){
+      ctx.fillStyle = '#2ecc71'; ctx.fillRect(it.x - camera.x + 16, it.y - camera.y - 36, 4, 36);
+      ctx.beginPath(); ctx.moveTo(it.x - camera.x + 20, it.y - camera.y - 36); ctx.lineTo(it.x - camera.x + 48, it.y - camera.y - 22); ctx.lineTo(it.x - camera.x + 20, it.y - camera.y - 10); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // small instructions
+  ctx.fillStyle = '#dfefff'; ctx.font = '14px system-ui'; ctx.fillText('Editor: click to place. Use tool buttons to the right. Save to add to levels.', 18, 26);
+}
+
+/* menu background while idle (simple animation) */
+let menuTick = 0;
+function renderMenuDecor(){
+  menuTick += 0.8;
+  ctx.clearRect(0,0,W,H);
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#09121a'); g.addColorStop(1,'#05202d'); ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  for(let i=0;i<40;i++){
+    const x = (i * 73 + menuTick*2) % (W + 200) - 100;
+    ctx.fillRect(x, 60 + (i%8)*16, 2,2);
+  }
+}
+
+/* -------- Utility draw utils -------- */
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+/* ------------ init & boot ------------ */
+init();
+showMenu();
+
+</script>
+</body>
+</html>
