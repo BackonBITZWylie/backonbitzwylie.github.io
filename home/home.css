@@ -11,7 +11,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
 }
 
 .links {
@@ -20,6 +20,8 @@ flex-direction: row;
 align-items: center;
 gap: 1rem;
 font-size: 24px;
+flex-wrap: wrap;
+justify-content: space-evenly;
 }
 
 h1 {
@@ -27,6 +29,13 @@ h1 {
     font-weight: bold;
 }
 
+p {
+font-style: italic;
+font-size: 24px;
+width: 900px;
+gap: 1rem;
+
+}
 
 .links a {
 background: black;
@@ -45,10 +54,5 @@ color: black
 
 body {
     background-image: url("./bacon-svgrepo-com.svg");
-    background-repeat: no-repeat;
-}
-
-p{
-    font-size: 24px;
-    font-weight: bold;
+    background-repeat: round;
 }
