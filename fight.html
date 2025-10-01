@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced 2D Fighting Game</title>
+<style>
+  body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #222;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  canvas {
+    background: #000;
+    border: 3px solid white;
+    margin-top: 20px;
+  }
+  #ui {
+    margin-top: 10px;
+  }
+  select, button {
+    margin: 5px;
+    padding: 5px;
+  }
+</style>
+</head>
+<body>
+<h1>Advanced 2D Fighting Game</h1>
+<div id="ui">
+  <label>Map: 
+    <select id="mapSelect"></select>
+  </label>
+  <label>Player 1: 
+    <select id="char1Select"></select>
+  </label>
+  <label>Player 2: 
+    <select id="char2Select"></select>
+  </label>
+  <button onclick="startGame()">Start Game</button>
+</div>
+<canvas id="gameCanvas" width="900" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const maps = [
+  {name:'Desert', color:'#EEDC82', hazardY:400},
+  {name:'Forest', color:'#228B22', hazardY:380},
+  {name:'City', color:'#555555', hazardY:420},
+  {name:'Ice', color:'#A0E7E5', hazardY:390},
+  {name:'Volcano', color:'#FF4500', hazardY:410},
+  {name:'Sky', color:'#87CEEB', hazardY:360},
+  {name:'Beach', color:'#FFD700', hazardY:400},
+  {name:'Castle', color:'#888888', hazardY:400},
+  {name:'Space', color:'#111111', hazardY:370},
+  {name:'Cave', color:'#333333', hazardY:430}
+];
+
+const characters = [
+  {name:'Ninja', color:'red', sprite:null},
+  {name:'Samurai', color:'blue', sprite:null},
+  {name:'Robot', color:'grey', sprite:null},
+  {name:'Knight', color:'silver', sprite:null},
+  {name:'Pirate', color:'brown', sprite:null},
+  {name:'Wizard', color:'purple', sprite:null},
+  {name:'Alien', color:'green', sprite:null},
+  {name:'Viking', color:'orange', sprite:null},
+  {name:'Soldier', color:'olive', sprite:null},
+  {name:'Monster', color:'darkgreen', sprite:null},
+  {name:'Assassin', color:'black', sprite:null},
+  {name:'Mage', color:'pink', sprite:null}
+];
+
+const mapSelect = document.getElementById('mapSelect');
+const char1Select = document.getElementById('char1Select');
+const char2Select = document.getElementById('char2Select');
+
+maps.forEach(map => {
+  let opt = document.createElement('option');
+  opt.value = map.name;
+  opt.innerText = map.name;
+  mapSelect.appendChild(opt);
+});
+characters.forEach(char => {
+  let opt1 = document.createElement('option');
+  let opt2 = document.createElement('option');
+  opt1.value = char.name; opt1.innerText = char.name;
+  opt2.value = char.name; opt2.innerText = char.name;
+  char1Select.appendChild(opt1);
+  char2Select.appendChild(opt2);
+});
+
+// Game state
+let gameRunning = false;
+let keys = {};
+let gravity = 1.2;
+
+class Player {
+  constructor(name, color, x, y, controls) {
+    this.name = name;
+    this.color = color;
+    this.x = x;
+    this.y = y;
+    this.width = 50;
+    this.height = 50;
+    this.vx = 0;
+    this.vy = 0;
+    this.hp = 100;
+    this.controls = controls;
+    this.onGround = false;
+    this.attackCooldown = 0;
+    this.specialCooldown = 0;
+  }
+
+  update() {
+    // Horizontal movement
+    if (keys[this.controls.left]) this.vx = -5;
+    else if (keys[this.controls.right]) this.vx = 5;
+    else this.vx = 0;
+
+    // Jump
+    if (keys[this.controls.up] && this.onGround) {
+      this.vy = -18;
+      this.onGround = false;
+    }
+
+    // Gravity
+    this.vy += gravity;
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Ground collision (hazard for map-specific)
+    const map = maps.find(m => m.name === mapSelect.value);
+    if (this.y + this.height > map.hazardY) {
+      this.y = map.hazardY - this.height;
+      this.vy = 0;
+      this.onGround = true;
+    }
+
+    // Attack
+    if (keys[this.controls.attack] && this.attackCooldown <= 0) {
+      if (this === player1 && hit({x:this.x+this.width, y:this.y, width:20, height:this.height}, player2)) player2.hp -= 10;
+      if (this === player2 && hit({x:this.x-20, y:this.y, width:20, height:this.height}, player1)) player1.hp -= 10;
+      this.attackCooldown = 20;
+    } else if (this.attackCooldown > 0) this.attackCooldown--;
+
+    // Special move
+    if (keys[this.controls.special] && this.specialCooldown <= 0) {
+      if (this === player1 && hit({x:this.x+this.width, y:this.y-20, width:50, height:50}, player2)) player2.hp -= 20;
+      if (this === player2 && hit({x:this.x-50, y:this.y-20, width:50, height:50}, player1)) player1.hp -= 20;
+      this.specialCooldown = 120;
+    } else if (this.specialCooldown > 0) this.specialCooldown--;
+  }
+
+  draw() {
+    // Placeholder rectangle sprite (replace with image later)
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+}
+
+// Collision detection
+function hit(a, b) {
+  return a.x < b.x + b.width &&
+         a.x + a.width > b.x &&
+         a.y < b.y + b.height &&
+         a.y + a.height > b.y;
+}
+
+// Players setup
+let player1 = new Player(characters[0].name, characters[0].color, 100, 300, {
+  left:'a', right:'d', up:'w', attack:'f', special:'g'
+});
+let player2 = new Player(characters[1].name, characters[1].color, 750, 300, {
+  left:'ArrowLeft', right:'ArrowRight', up:'ArrowUp', attack:'l', special:'k'
+});
+
+// Event listeners
+document.addEventListener('keydown', e => keys[e.key] = true);
+document.addEventListener('keyup', e => keys[e.key] = false);
+
+function startGame() {
+  // Assign characters
+  const char1 = characters.find(c => c.name === char1Select.value);
+  const char2 = characters.find(c => c.name === char2Select.value);
+  player1.name = char1.name;
+  player1.color = char1.color;
+  player2.name = char2.name;
+  player2.color = char2.color;
+
+  player1.hp = 100;
+  player2.hp = 100;
+  player1.x = 100;
+  player1.y = 300;
+  player2.x = 750;
+  player2.y = 300;
+
+  gameRunning = true;
+  requestAnimationFrame(gameLoop);
+}
+
+function drawMap() {
+  const map = maps.find(m => m.name === mapSelect.value);
+  ctx.fillStyle = map.color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Hazard line
+  ctx.fillStyle = 'darkred';
+  ctx.fillRect(0, map.hazardY, canvas.width, canvas.height-map.hazardY);
+  ctx.fillStyle = 'white';
+  ctx.font = '20px sans-serif';
+  ctx.fillText(`Map: ${map.name}`, 10, 30);
+}
+
+function drawHealth() {
+  ctx.fillStyle = 'red';
+  ctx.fillRect(50, 10, player1.hp*2, 20);
+  ctx.fillRect(650, 10, player2.hp*2, 20);
+}
+
+function gameLoop() {
+  if (!gameRunning) return;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawMap();
+
+  player1.update();
+  player2.update();
+  player1.draw();
+  player2.draw();
+  drawHealth();
+
+  // Check for win
+  if (player1.hp <= 0 || player2.hp <= 0) {
+    gameRunning = false;
+    alert(player1.hp <= 0 ? `${player2.name} Wins!` : `${player1.name} Wins!`);
+    return;
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+</script>
+</body>
+</html>
