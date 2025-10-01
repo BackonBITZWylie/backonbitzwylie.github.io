@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced 2D Fighting Game</title>
+<title>Fighting Game</title>
 <style>
   body {
     margin: 0;
@@ -29,7 +29,7 @@
 </style>
 </head>
 <body>
-<h1>Advanced 2D Fighting Game</h1>
+<h1>Fighting Game</h1>
 <div id="ui">
   <label>Map: 
     <select id="mapSelect"></select>
@@ -49,32 +49,30 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const maps = [
-  {name:'Desert', color:'#EEDC82', hazardY:400},
-  {name:'Forest', color:'#228B22', hazardY:380},
-  {name:'City', color:'#555555', hazardY:420},
-  {name:'Ice', color:'#A0E7E5', hazardY:390},
-  {name:'Volcano', color:'#FF4500', hazardY:410},
-  {name:'Sky', color:'#87CEEB', hazardY:360},
-  {name:'Beach', color:'#FFD700', hazardY:400},
-  {name:'Castle', color:'#888888', hazardY:400},
-  {name:'Space', color:'#111111', hazardY:370},
-  {name:'Cave', color:'#333333', hazardY:430}
+  {name:'Computer', color:'#808080', hazardY:400},
+  {name:'Clouds', color:'#FFFFFF', hazardY:380},
+  {name:'Shop', color:'#A52A2A', hazardY:420},
+  {name:'Public', color:'#8B0000', hazardY:390},
+  {name:'Room', color:'#E0BFB8', hazardY:410},
+  {name:'Tree', color:'#228B22', hazardY:360},
+  {name:'Yard', color:'#F5F5DC', hazardY:400},
+  {name:'Work', color:'#1B1B1B', hazardY:400},
+  {name:'House', color:'#FFFDD0', hazardY:370},
+  {name:'Heaven', color:'#FF2400', hazardY:430}
 ];
 
 const characters = [
-  {name:'Ninja', color:'red', sprite:null},
-  {name:'Samurai', color:'blue', sprite:null},
-  {name:'Robot', color:'grey', sprite:null},
-  {name:'Knight', color:'silver', sprite:null},
-  {name:'Pirate', color:'brown', sprite:null},
-  {name:'Wizard', color:'purple', sprite:null},
-  {name:'Alien', color:'green', sprite:null},
-  {name:'Viking', color:'orange', sprite:null},
-  {name:'Soldier', color:'olive', sprite:null},
-  {name:'Monster', color:'darkgreen', sprite:null},
-  {name:'Assassin', color:'black', sprite:null},
-  {name:'Mage', color:'pink', sprite:null}
-];
+  {name:"The Creator (He created this game)", color:'silver', sprite:null},
+  {name:"Pru (She's and angel)", color:'green', sprite:null},
+  {name:"Uncle R (He's bald)", color:'tan', sprite:null},
+  {name:"Robe Guy (He's crazy)", color:'purple', sprite:null},
+  {name:"Sis (She's just annoying, don't pick her)", color:'cyan', sprite:null},
+  {name:"Sunny (He's just a cat)", color:'orange', sprite:null},
+  {name:"Winston (Doggo)", color:'#D2691E', sprite:null},
+  {name:"Mom (She says that she can end your life)", color:'pink', sprite:null},
+  {name:"Dad (He controls your existence)", color:'blue', sprite:null},
+  {name:"God (I ran out of ideas...good luck)", color:'gold', sprite:null},
+]
 
 const mapSelect = document.getElementById('mapSelect');
 const char1Select = document.getElementById('char1Select');
