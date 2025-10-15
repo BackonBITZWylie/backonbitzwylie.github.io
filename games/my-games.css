@@ -11,7 +11,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 16px;
 }
 
 .links {
@@ -54,6 +55,6 @@ color: black
 }
 
 body {
-    background-image: url("./bacon-svgrepo-com.svg");
-    background-repeat: round;
+    background-image: url("file:///C:/Users/1107-03/Downloads/ps-controller-svgrepo-com%20(1).svg");
+    background-repeat: no-repeat;
 }

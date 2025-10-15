@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock Paper Scissors</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #74ABE2, #5563DE);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .choices {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #333;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+      background: #f0f0f0;
+    }
+
+    .result, .scoreboard {
+      font-size: 1.3rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #FFD700;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rock, Paper, Scissors</h1>
+
+  <div class="choices">
+    <button onclick="play('rock')">🪨 Rock</button>
+    <button onclick="play('paper')">📄 Paper</button>
+    <button onclick="play('scissors')">✂️ Scissors</button>
+  </div>
+
+  <div class="result" id="result">Make your move!</div>
+  <div class="scoreboard" id="scoreboard">You: 0 | Computer: 0</div>
+
+  <footer>Made with love by BackonBITZ.</footer>
+
+  <script>
+    let playerScore = 0;
+    let computerScore = 0;
+
+    function play(playerChoice) {
+      const choices = ['rock', 'paper', 'scissors'];
+      const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+      const resultDiv = document.getElementById('result');
+
+      let result = '';
+
+      if (playerChoice === computerChoice) {
+        result = "It's a draw!";
+      } else if (
+        (playerChoice === 'rock' && computerChoice === 'scissors') ||
+        (playerChoice === 'paper' && computerChoice === 'rock') ||
+        (playerChoice === 'scissors' && computerChoice === 'paper')
+      ) {
+        result = 'You win!';
+        playerScore++;
+      } else {
+        result = 'You lose!';
+        computerScore++;
+      }
+
+      resultDiv.innerHTML = `
+        You chose <span class="highlight">${playerChoice}</span>, 
+        computer chose <span class="highlight">${computerChoice}</span>.<br>
+        <strong>${result}</strong>
+      `;
+
+      document.getElementById('scoreboard').innerText =
+        `You: ${playerScore} | Computer: ${computerScore}`;
+    }
+  </script>
+</body>
+</html>

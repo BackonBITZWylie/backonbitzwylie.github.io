@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess the Number</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .game-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 320px;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    input[type="number"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 80px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      margin-right: 0.5rem;
+      text-align: center;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .message {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .attempts {
+      margin-top: 0.5rem;
+      color: #555;
+    }
+
+    .reset-btn {
+      margin-top: 1rem;
+      background-color: #2196F3;
+    }
+
+    .reset-btn:hover {
+      background-color: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🎯 Guess the Number</h1>
+    <p>I'm thinking of a number between <strong>1 and 100</strong>.</p>
+    <input type="number" id="guessInput" min="1" max="100" />
+    <button id="guessBtn">Guess</button>
+
+    <div class="message" id="message"></div>
+    <div class="attempts" id="attempts"></div>
+    <button class="reset-btn" id="resetBtn" style="display: none;">Play Again</button>
+  </div>
+
+  <script>
+    let secretNumber = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+
+    const guessInput = document.getElementById('guessInput');
+    const guessBtn = document.getElementById('guessBtn');
+    const message = document.getElementById('message');
+    const attemptsDisplay = document.getElementById('attempts');
+    const resetBtn = document.getElementById('resetBtn');
+
+    guessBtn.addEventListener('click', () => {
+      const guess = Number(guessInput.value);
+      if (!guess || guess < 1 || guess > 100) {
+        message.textContent = 'Please enter a number between 1 and 100.';
+        return;
+      }
+
+      attempts++;
+
+      if (guess === secretNumber) {
+        message.textContent = `🎉 Correct! The number was ${secretNumber}.`;
+        message.style.color = '#4CAF50';
+        guessBtn.disabled = true;
+        resetBtn.style.display = 'inline-block';
+      } else if (guess < secretNumber) {
+        message.textContent = 'Too low! Try a higher number.';
+        message.style.color = '#FF9800';
+      } else {
+        message.textContent = 'Too high! Try a lower number.';
+        message.style.color = '#FF5722';
+      }
+
+      attemptsDisplay.textContent = `Attempts: ${attempts}`;
+      guessInput.value = '';
+      guessInput.focus();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      message.textContent = '';
+      attemptsDisplay.textContent = '';
+      guessBtn.disabled = false;
+      resetBtn.style.display = 'none';
+      guessInput.value = '';
+      guessInput.focus();
+    });
+  </script>
+  <footer>Made with love by BackonBITZ.</footer>
+</body>
+</html>

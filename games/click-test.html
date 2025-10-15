@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Click Speed Test</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#071021 0%, #071727 100%);color:#e6eef6;display:flex;align-items:center;justify-content:center;padding:32px}
+
+    .card{width:100%;max-width:720px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6);}
+    h1{margin:0 0 8px;font-size:22px}
+    p.lead{margin:0 0 20px;color:var(--muted)}
+
+    .grid{display:grid;grid-template-columns:1fr 260px;gap:20px}
+    @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+    .panel{background:var(--card);padding:18px;border-radius:10px}
+    .big-btn{display:flex;align-items:center;justify-content:center;height:120px;border-radius:10px;background:linear-gradient(180deg,#0b2030,#081424);border:1px solid rgba(255,255,255,0.04);cursor:pointer;font-size:28px;font-weight:700}
+    .big-btn:active{transform:translateY(1px)}
+    .big-btn[aria-disabled="true"]{opacity:0.6;cursor:not-allowed}
+
+    .meta{display:flex;flex-direction:column;gap:12px}
+    .stat{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.02)}
+    .stat .label{color:var(--muted);font-size:13px}
+    .stat .value{font-weight:700;font-size:18px}
+
+    .controls{display:flex;gap:10px;margin-top:10px}
+    button.btn{padding:10px 12px;border-radius:8px;border:0;background:linear-gradient(90deg,var(--accent),#7c3aed);color:#021124;font-weight:700;cursor:pointer}
+    button.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+    .result{margin-top:14px;padding:12px;border-radius:8px;background:linear-gradient(180deg, rgba(6,182,212,0.06), rgba(124,58,237,0.03));border:1px solid rgba(255,255,255,0.03)}
+    .result strong{font-size:20px}
+
+    .hint{margin-top:12px;color:var(--muted);font-size:13px}
+
+    footer.attribution{margin-top:14px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <h1>Click Speed Test</h1>
+    <p class="lead">User has <strong>10 seconds</strong> to click a button as many times as possible.</p>
+
+    <div class="grid">
+      <section class="panel">
+        <div id="clickBtn" class="big-btn" role="button" tabindex="0" aria-pressed="false" aria-disabled="true">Start</div>
+        <div class="hint">Tip: You can also press the <kbd>Space</kbd> key to click while the test is running.</div>
+      </section>
+
+      <aside class="panel meta" aria-live="polite">
+        <div class="stat"><div class="label">Time left</div><div id="time" class="value">10.0s</div></div>
+        <div class="stat"><div class="label">Clicks</div><div id="clicks" class="value">0</div></div>
+        <div class="stat"><div class="label">Clicks / second</div><div id="cps" class="value">0.00</div></div>
+
+        <div class="controls">
+          <button id="startBtn" class="btn">Start Test</button>
+          <button id="resetBtn" class="btn ghost">Reset</button>
+        </div>
+
+        <div id="result" class="result" hidden>
+          <div><strong id="resultText">Your final speed: 0.00 cps</strong></div>
+          <div class="hint">Try again to beat your score.</div>
+        </div>
+
+        <footer class="attribution">Made with love by BackonBITZ.</footer>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    // --- Variables ---
+    const TOTAL_SECONDS = 10; // game duration in seconds
+    let clicks = 0;
+    let remaining = TOTAL_SECONDS;
+    let running = false;
+    let timerId = null;
+    let lastTick = null; // for smooth sub-second display
+
+    // --- Elements ---
+    const clickBtn = document.getElementById('clickBtn');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const timeEl = document.getElementById('time');
+    const clicksEl = document.getElementById('clicks');
+    const cpsEl = document.getElementById('cps');
+    const resultEl = document.getElementById('result');
+    const resultText = document.getElementById('resultText');
+
+    // --- Helpers ---
+    function formatTime(secs){
+      return secs.toFixed(1) + 's';
+    }
+
+    function updateLiveStats(){
+      clicksEl.textContent = clicks;
+      const elapsed = TOTAL_SECONDS - Math.max(0, remaining);
+      const cps = elapsed > 0 ? (clicks / elapsed) : 0;
+      cpsEl.textContent = cps.toFixed(2);
+    }
+
+    function updateTimeDisplay(){
+      timeEl.textContent = formatTime(Math.max(0, remaining));
+    }
+
+    // --- Game flow ---
+    function startGame(){
+      if(running) return;
+      running = true;
+      clicks = 0;
+      remaining = TOTAL_SECONDS;
+      lastTick = performance.now();
+      clickBtn.setAttribute('aria-disabled','false');
+      clickBtn.textContent = 'Click!';
+      clickBtn.setAttribute('aria-pressed','false');
+      startBtn.disabled = true;
+      resultEl.hidden = true;
+      updateLiveStats();
+      updateTimeDisplay();
+
+      // smooth high-resolution timer
+      timerId = requestAnimationFrame(tick);
+    }
+
+    function tick(now){
+      const delta = (now - lastTick) / 1000;
+      lastTick = now;
+      remaining -= delta;
+      if(remaining <= 0){
+        remaining = 0;
+        endGame();
+        updateTimeDisplay();
+        updateLiveStats();
+        return;
+      }
+      updateTimeDisplay();
+      updateLiveStats();
+      timerId = requestAnimationFrame(tick);
+    }
+
+    function endGame(){
+      running = false;
+      if(timerId){
+        cancelAnimationFrame(timerId);
+        timerId = null;
+      }
+      clickBtn.setAttribute('aria-disabled','true');
+      clickBtn.textContent = 'Finished';
+      startBtn.disabled = false;
+
+      // final CPS uses the official TOTAL_SECONDS
+      const cps = clicks / TOTAL_SECONDS;
+      resultText.textContent = `Your final speed: ${cps.toFixed(2)} cps (${clicks} clicks in ${TOTAL_SECONDS}s)`;
+      resultEl.hidden = false;
+      // update cps and clicks displays
+      cpsEl.textContent = cps.toFixed(2);
+      clicksEl.textContent = clicks;
+    }
+
+    function resetGame(){
+      running = false;
+      clicks = 0;
+      remaining = TOTAL_SECONDS;
+      if(timerId){ cancelAnimationFrame(timerId); timerId = null; }
+      clickBtn.setAttribute('aria-disabled','true');
+      clickBtn.textContent = 'Start';
+      startBtn.disabled = false;
+      resultEl.hidden = true;
+      updateTimeDisplay();
+      updateLiveStats();
+    }
+
+    // --- Event listeners ---
+    // Click or press the big button while the test is running to increment
+    clickBtn.addEventListener('click', (e) => {
+      // ignore clicks if disabled
+      if(clickBtn.getAttribute('aria-disabled') === 'true') return;
+      if(!running) return;
+      clicks += 1;
+      // quick visual pressed state for a11y
+      clickBtn.setAttribute('aria-pressed','true');
+      setTimeout(()=>clickBtn.setAttribute('aria-pressed','false'),80);
+      updateLiveStats();
+    });
+
+    // Start and reset buttons
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', resetGame);
+
+    // Keyboard support: Space or Enter to click while running; Enter on the big button to start when not running
+    window.addEventListener('keydown', (e) => {
+      if(e.code === 'Space'){
+        // prevent page scroll when pressing space
+        e.preventDefault();
+        if(running){
+          clicks += 1;
+          updateLiveStats();
+        }
+      }
+      if(e.code === 'Enter'){
+        // If focus is on the big button and the test isn't started, start it
+        if(document.activeElement === clickBtn && !running){
+          startGame();
+        }
+      }
+    });
+
+    // initialize UI
+    resetGame();
+
+    // Expose some helpers for learning / console experimentation
+    window.__ClickSpeedTest = { startGame, endGame, resetGame };
+  </script>
+</body>
+</html>

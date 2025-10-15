@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tic-Tac-Toe</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #f2f4f8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  h1 {
+    color: #333;
+  }
+
+  #game {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-gap: 8px;
+    margin-top: 20px;
+  }
+
+  .cell {
+    width: 100px;
+    height: 100px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    transition: background 0.3s ease;
+  }
+
+  .cell:hover {
+    background: #e7eef9;
+  }
+
+  .winner {
+    background: #a7f3d0 !important;
+  }
+
+  .controls {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background: #1e40af;
+  }
+
+  .scoreboard {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    font-size: 1.1em;
+  }
+
+  .scoreboard div {
+    background: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
+</style>
+</head>
+<body>
+
+<h1>Tic-Tac-Toe</h1>
+
+<div class="controls">
+  <button id="twoPlayer">2 Player</button>
+  <button id="vsAI">vs AI</button>
+  <button id="reset">Reset</button>
+</div>
+
+<div id="game"></div>
+
+<div class="scoreboard">
+  <div>X Wins: <span id="xScore">0</span></div>
+  <div>O Wins: <span id="oScore">0</span></div>
+  <div>Draws: <span id="draws">0</span></div>
+</div>
+
+<script>
+  const gameContainer = document.getElementById("game");
+  const resetBtn = document.getElementById("reset");
+  const twoPlayerBtn = document.getElementById("twoPlayer");
+  const vsAIBtn = document.getElementById("vsAI");
+  const xScoreEl = document.getElementById("xScore");
+  const oScoreEl = document.getElementById("oScore");
+  const drawsEl = document.getElementById("draws");
+
+  let board = ["", "", "", "", "", "", "", "", ""];
+  let currentPlayer = "X";
+  let vsAI = false;
+  let gameActive = true;
+
+  const scores = JSON.parse(localStorage.getItem("ticTacToeScores")) || {
+    X: 0,
+    O: 0,
+    Draw: 0,
+  };
+  updateScoreboard();
+
+  function createBoard() {
+    gameContainer.innerHTML = "";
+    board.forEach((_, i) => {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.index = i;
+      cell.addEventListener("click", handleClick);
+      gameContainer.appendChild(cell);
+    });
+  }
+
+  function handleClick(e) {
+    const index = e.target.dataset.index;
+    if (!gameActive || board[index] !== "") return;
+    board[index] = currentPlayer;
+    e.target.textContent = currentPlayer;
+
+    const winner = checkWinner();
+    if (winner) {
+      highlightWinner(winner.line);
+      endGame(winner.player);
+      return;
+    }
+
+    if (board.every(c => c !== "")) {
+      endGame("Draw");
+      return;
+    }
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+
+    if (vsAI && currentPlayer === "O") {
+      aiMove();
+    }
+  }
+
+  function aiMove() {
+    const emptyCells = board.map((v, i) => (v === "" ? i : null)).filter(i => i !== null);
+    const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const cell = document.querySelector(`[data-index='${move}']`);
+    setTimeout(() => {
+      cell.click();
+    }, 400);
+  }
+
+  function checkWinner() {
+    const lines = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    for (const line of lines) {
+      const [a,b,c] = line;
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return { player: board[a], line };
+      }
+    }
+    return null;
+  }
+
+  function highlightWinner(line) {
+    line.forEach(i => {
+      document.querySelector(`[data-index='${i}']`).classList.add("winner");
+    });
+  }
+
+  function endGame(result) {
+    gameActive = false;
+    if (result === "Draw") {
+      scores.Draw++;
+    } else {
+      scores[result]++;
+    }
+    localStorage.setItem("ticTacToeScores", JSON.stringify(scores));
+    updateScoreboard();
+  }
+
+  function updateScoreboard() {
+    xScoreEl.textContent = scores.X;
+    oScoreEl.textContent = scores.O;
+    drawsEl.textContent = scores.Draw;
+  }
+
+  resetBtn.addEventListener("click", () => {
+    board = ["", "", "", "", "", "", "", "", ""];
+    currentPlayer = "X";
+    gameActive = true;
+    createBoard();
+  });
+
+  twoPlayerBtn.addEventListener("click", () => {
+    vsAI = false;
+    resetBtn.click();
+  });
+
+  vsAIBtn.addEventListener("click", () => {
+    vsAI = true;
+    resetBtn.click();
+  });
+
+  createBoard();
+</script>
+<footer>Made with love by BackonBITZ.</footer>
+</body>
+</html>
