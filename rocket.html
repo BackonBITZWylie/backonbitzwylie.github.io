@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+
+    </title>
+  </head>
+  <body>
+    <div id="rocket">🚀</div>
+    <div id="star"  >🌍</div>
+
+    <script>
+      document.body.style.overflow   = "hidden"
+      document.body.style.background = "black"
+      document.body.style.cursor     = "none"
+      
+      const rocket = document.getElementById("rocket")
+      rocket.style.transformOrigin   = "center"
+      rocket.style.position          = "absolute"
+
+      const star = document.getElementById("star")
+      star.style.transformOrigin     = "center"
+      star.style.position            = "absolute"
+      
+      // rocket configuration
+      const max = 500 // pixels per second
+      const acc = 500  // pixels per second per second
+      // rocket coordinates
+      let x = window.innerWidth  / 2;
+      let y = window.innerHeight / 2;
+      let a = 0;
+      // rocket velocity
+      let vx = 0;
+      let vy = 0;
+
+      // mouse coordinates
+      let mx = x;
+      let my = y;
+      // mouse listener
+      document.addEventListener("mousemove", (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+      })
+
+      function update(t, dt) {
+        const dx = mx - x;
+        const dy = my - y;
+
+        if (dx !== 0 || dy !== 0) {
+          const angle = Math.atan2(dy, dx)
+          vx += Math.cos(angle) * acc * dt
+          vy += Math.sin(angle) * acc * dt
+          const speed = Math.hypot(vy, vx)
+          if (speed > max) {
+            const angle = Math.atan2(vy, vx)
+            vx = max * Math.cos(angle)
+            vy = max * Math.sin(angle)
+          }
+
+          if (vx != 0 || vy != 0) {
+            a = Math.atan2(vy, vx)
+          }
+        }
+
+        x += vx * dt
+        y += vy * dt
+      }
+
+      function render(t, dt) {
+        const angle = a + Math.PI / 4
+        rocket.style.transform = `translate(${ x}px,${ y}px) rotate(${angle}rad) scale(4)`
+        star  .style.transform = `translate(${mx}px,${my}px) scale(4)`
+      }
+
+      function animate(t0, t1, t2) {
+        const t  = (t2 - t0) / 1000
+        const dt = (t2 - t1) / 1000
+        update(t, dt)
+        render(t, dt)
+        requestAnimationFrame(t3 => animate(t0, t2, t3))
+      }
+
+      requestAnimationFrame(
+        t0 => requestAnimationFrame(
+          t1 => requestAnimationFrame(
+            t2 => animate(t0, t1, t2))))
+    </script>
+  </body>
+</html>

@@ -15,19 +15,19 @@
 
                 // check if name is valid
                 if (
-                    name === "Dad"          ||
-                    name === "Matt"         ||
-                    name === "Matt Fazekas" ||
-                    name === "Robe guy"     ||
-                    name === "Batman"        
+                    name.toLowerCase() === "dad"          ||
+                    name.toLowerCase() === "matt"         ||
+                    name.toLowerCase() === "matt fazekas" ||
+                    name.toLowerCase() === "robe guy"     ||
+                    name.toLowerCase() === "batman"        
                 ) {
                     alert ("Hello Dad, I'm learning about JavaScript, hope you like it.")
                     isValid = true
                 } else if (
-                    name === "Uncle Richard"   ||
-                    name === "Dick"            ||
-                    name === "Richard Fazekas" ||
-                    name === "Richard"
+                    name.toLowerCase() === "uncle richard"   ||
+                    name.toLowerCase() === "dick"            ||
+                    name.toLowerCase() === "richard fazekas" ||
+                    name.toLowerCase() === "richard"
                 ) {
                     alert ("Hi Uncle Richard!")
                     isValid = true
@@ -45,12 +45,12 @@
 
                 // check if color is valid
                 if (
-                    color === "Purple"
+                    color.toLowerCase() === "purple"
                 ) {
                     isValid = true
                     alert ("You're my real dad!")
                 } else if (
-                    color === "Blue"
+                    color.toLowerCase() === "blue"
                 ) {
                     isValid = true
                     alert("You're Uncle Richard...sigh.")
@@ -68,13 +68,13 @@
 
                 // check if pet is valid
                 if (
-                    pet === "Sunny" ||
-                    pet === "Barron"
+                    pet.toLowerCase() === "sunny" ||
+                    pet.toLowerCase() === "barron"
                 ) {
                     isValid = true
                     alert ("Correct. You may now enter!")
                 } else if (
-                    pet === "Winston"
+                    pet.toLowerCase() === "winston"
                 ) {
                     isValid = true
                     alert("Correct. You may now enter!")

@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fighting Game</title>
+<title>Family Fight</title>
 <style>
-body { margin:0; font-family:sans-serif; background:#222; color:white; display:flex; justify-content:center; align-items:center; height:100vh; }
+body { margin:0; font-family:sans-serif; background:#370c6e; color:white; display:flex; justify-content:center; align-items:center; height:100vh; }
 .screen { display:none; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; }
 .screen.active { display:flex; }
 button { padding:10px 20px; margin:10px; font-size:18px; cursor:pointer; }
@@ -19,7 +19,7 @@ canvas { border:3px solid white; background:black; }
 
 <!-- MAIN MENU -->
 <div id="mainMenu" class="screen active">
-  <h1>Fighting Game</h1>
+  <h1>Family Fight</h1>
   <h2>Select Mode</h2>
   <button onclick="chooseMode('Stocks')">Stocks</button>
   <button onclick="chooseMode('Time')">Time</button>
@@ -32,9 +32,9 @@ canvas { border:3px solid white; background:black; }
   <button id="mapNextBtn">Next</button>
 </div>
 
-<!-- CHARACTER SELECT SCREEN -->
+<!-- FIGHTER SELECT SCREEN -->
 <div id="charSelectScreen" class="screen">
-  <h2>Select Characters</h2>
+  <h2>Choose your fighter!</h2>
   <canvas id="charCanvas" width="900" height="400"></canvas>
   <div style="display:flex; justify-content:space-between; width:850px; margin-top:10px;">
     <div id="p1Box">Player 1: None</div>
