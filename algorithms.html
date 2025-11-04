@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello Algorithms</title>
+  </head>
+  <body>
+    <script>
+    // compute the standard deviation of the following numbers
+      let numbers = [
+        86, 45, 12, 44, 2,
+        43, 55, 29, 67, 81
+      ]
+
+    let sum = 0;
+    for (let i = 0; i < numbers.length; i++) {
+      sum += numbers[i];
+    }
+    const mean = sum / numbers.length;
+
+    let squaredDifferencesSum = 0;
+    for (let i = 0; i < numbers.length; i++) {
+      const difference = numbers[i] - mean;
+      squaredDifferencesSum += difference * difference;
+    }
+
+    const variance = squaredDifferencesSum / (numbers.length - 1);
+
+    const standardDeviation = Math.sqrt(variance);
+
+    console.log("Standard Deviation:", standardDeviation);
+    </script>
+  </body>
+</html>
+
