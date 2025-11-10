@@ -58,3 +58,12 @@ body {
     background-image: url("file:///C:/Users/1107-03/Downloads/ps-controller-svgrepo-com%20(1).svg");
     background-repeat: no-repeat;
 }
+
+.hidden{
+    font-size: 5px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
