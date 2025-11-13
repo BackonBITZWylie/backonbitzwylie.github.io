@@ -15,15 +15,6 @@
     gap: 16px;
 }
 
-.links {
-display: flex;
-flex-direction: row;
-align-items: center;
-gap: 1rem;
-font-size: 24px;
-flex-wrap: wrap;
-justify-content: space-evenly;
-}
 
 h1 {
     font-size: 64px;
@@ -36,6 +27,16 @@ font-size: 24px;
 width: 900px;
 gap: 1rem;
 
+}
+
+.links {
+display: flex;
+flex-direction: row;
+align-items: center;
+gap: 1rem;
+font-size: 24px;
+flex-wrap: wrap;
+justify-content: space-evenly;
 }
 
 .links a {
