@@ -15,10 +15,6 @@ body {
     background-size: 25cap;
 }
 
-body {
-    background-color: rgb(0, 255, 242);
-}
-
 img {
     width: 50dvw;
 }
@@ -48,3 +44,50 @@ video{
     display: flex;
     flex-direction: row;
 }
+
+    button {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button:hover {
+        background: rgb(0, 255, 242);
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+      
+      .dark body {
+        background: rgb(0, 255, 242);
+        color: black;
+      }
+
+      .dark button {
+        background: rgb(0, 255, 242);
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark button:hover {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .place {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 94dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      

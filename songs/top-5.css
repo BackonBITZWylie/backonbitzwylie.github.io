@@ -4,28 +4,12 @@
     padding:0;
 }
 
-.container {
-    width: 100dvw;
-    height: 100dvh;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
 .links {
 display: flex;
 flex-direction: row;
 align-items: center;
 gap: 1rem;
 font-size: 24px;
-}
-
-h1 {
-    font-size: 52px;
-    font-weight: normal;
-    font-style: oblique;
 }
 
 .links a {
@@ -37,11 +21,9 @@ padding-left: 12px;
 padding-right: 12px;
 cursor: pointer;
 text-decoration: none;
-display: block;
 }
 
 .links a:hover{
 background: white;
 color: black
 }
-

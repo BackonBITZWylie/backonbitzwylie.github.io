@@ -9,39 +9,11 @@
     height: 100dvh;
 
     display: flex;
-    align-items: center;
-}
-
-.container *:nth-child(1) {
-    max-width: 200px;
-}
-
-.container *:nth-child(2) {
-    padding: 2rem;
-
-    display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    gap: 16px;
 }
-
-.container *:nth-child(3) {
-    max-width: 200px;
-}
-
-
-h1 {
-    text-wrap: nowrap;
-    font-size: 64px;
-    font-weight: bold;
-}
-
-
-p{
-    font-size: 24px;
-    font-weight: bold;
-}
-
 
 .links {
 display: flex;
@@ -49,12 +21,27 @@ flex-direction: row;
 align-items: center;
 gap: 1rem;
 font-size: 24px;
+flex-wrap: wrap;
+justify-content: space-evenly;
+}
+
+h1 {
+    font-size: 64px;
+    font-weight: bold;
+}
+
+p {
+font-style: italic;
+font-size: 24px;
+width: 900px;
+gap: 1rem;
+
 }
 
 .links a {
 background: black;
 color: white;
-border: 2px solid white;
+border: 2px solid black;
 border-radius: 1rem;
 padding-left: 12px;
 padding-right: 12px;
@@ -65,10 +52,15 @@ text-decoration: none;
 .links a:hover{
 background: white;
 color: black;
-border: 2px solid black 
+border: 2px solid black
 }
-            
-button {
+
+body {
+    background-image: url("../pics/backon.svg");
+    background-repeat: round;
+}
+
+    button {
         background: white;
         color: black;
         border-radius: 1rem;
@@ -77,7 +69,7 @@ button {
       }
 
       button:hover {
-        background: royalblue;
+        background: darkgoldenrod;
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -85,12 +77,12 @@ button {
       }
       
       .dark body {
-        background: royalblue;
+        background: darkgoldenrod;
         color: black;
       }
 
       .dark button {
-        background: royalblue;
+        background: darkgoldenrod;
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -103,6 +95,12 @@ button {
         border-radius: 1rem;
         border: solid 1px black;
         outline: none;
+      }
+
+      .dark body image {
+        background-image: url("./pics/backon.svg");
+    background-repeat: no-repeat;
+    background-size: 50cap;
       }
 
       .place {

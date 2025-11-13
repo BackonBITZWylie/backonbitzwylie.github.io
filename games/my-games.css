@@ -51,7 +51,8 @@ text-decoration: none;
 
 .links a:hover{
 background: white;
-color: black
+color: black;
+border: 2px solid black
 }
 
 body {
@@ -67,3 +68,56 @@ body {
     align-items: center;
     justify-content: space-around;
 }
+
+    button {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button:hover {
+        background: teal;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+      
+      .dark body {
+        background: teal;
+        color: black;
+      }
+
+      .dark button {
+        background: teal;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark button:hover {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark body image {
+        background-image: url("./pics/backon.svg");
+    background-repeat: no-repeat;
+    background-size: 50cap;
+      }
+
+      .place {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 95dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      

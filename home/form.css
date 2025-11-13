@@ -1,0 +1,46 @@
+    button {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button:hover {
+        background: black;
+        color: white;
+        border-radius: 1rem;
+        border: solid 1px white;
+        outline: none;
+      }
+      
+      .dark body {
+        background: rgb(0, 0, 0);
+        color: white;
+      }
+
+      .dark button {
+        background: black;
+        color: white;
+        border-radius: 1rem;
+        border: solid 1px white;
+        outline: none;
+      }
+
+      .dark button:hover {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .place {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 94dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      

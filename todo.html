@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <h1>Todo List</h1>
+    <ol id="todo"></ol>
+    <input type="text" id="description">
+    <button id="add">Add Item</button>
+
+    <script>
+      const todo        = document.getElementById("todo")
+      const add         = document.getElementById("add")
+      const description = document.getElementById("description")
+
+      function newItem(desc) {
+        const li   = document.createElement("li")
+        const cb   = document.createElement("input")
+        const text = document.createElement("span")
+        const del  = document.createElement("button")
+
+        function deleteItem() {
+          todo.removeChild(li)
+        }
+
+        del.onclick = deleteItem
+        cb.type = "checkbox"
+        text.innerText = desc
+
+        cb.addEventListener("change", () => {
+          if (cb.checked) {
+            todo.removeChild(li)
+          }
+        })
+
+        li.appendChild(cb)
+        li.appendChild(text)
+        li.appendChild(del)
+        return li
+      }
+
+      function addItem() {
+        const text = description.value.trim()
+        if (text !== "") {
+          description.value = ""
+          todo.appendChild(newItem(text))
+        }
+      }
+
+      add.onclick = addItem
+    </script>
+  </body>
+</html>

@@ -31,7 +31,7 @@ h1 {
 .links a {
 background: black;
 color: white;
-border: 2px solid white;
+border: 2px solid black;
 border-radius: 1rem;
 padding-left: 12px;
 padding-right: 12px;
@@ -54,3 +54,56 @@ p{
     font-size: 24px;
     font-weight: bold;
 }
+
+    button {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button:hover {
+        background: silver;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+      
+      .dark body {
+        background: silver;
+        color: black;
+      }
+
+      .dark button {
+        background: silver;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark button:hover {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark body image {
+        background-image: url("./pics/backon.svg");
+    background-repeat: no-repeat;
+    background-size: 50cap;
+      }
+
+      .place {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 95dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      
