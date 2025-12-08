@@ -16,10 +16,7 @@
             }
             
             body{
-                background-image: url("https://th.bing.com/th/id/OIP.FY4taQ1EBMWH1Eb51DA_OQHaEo?w=335&h=180&c=7&r=0&o=7&pid=1.7&rm=3");
-                background-repeat: no-repeat;
-                background-size: cover;
-                background-position: center;
+                background-color: snow;
 
                 width : 100dvw;
                 height: 100dvh;
@@ -83,7 +80,7 @@
                 width: fit-content;
                 height:fit-content;
 
-                font-size: 50px;
+                font-size: 100px;
                 transform: translate(-50%, -50%);
 
                 animation: walk 15s infinite linear;
@@ -153,3 +150,49 @@
                     transform: translateY(-100px);
                 }
             }
+            button {
+        background: snow;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button:hover {
+        background: url(./snow.gif);
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+      
+      .dark body {
+        background: url(./snow.gif);
+        color: black;
+      }
+
+      .dark button {
+        background: url(./snow.gif);
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark button:hover {
+        background: snow;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .place {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 96dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      
