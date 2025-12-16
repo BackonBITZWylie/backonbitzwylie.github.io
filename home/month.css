@@ -159,7 +159,7 @@
       }
 
       button:hover {
-        background: url(./snow.gif);
+        background: url(../pics/snow.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -167,12 +167,12 @@
       }
       
       .dark body {
-        background: url(./snow.gif);
+        background: url(../pics/snow.gif);
         color: black;
       }
 
       .dark button {
-        background: url(./snow.gif);
+        background: url(../pics/snow.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
