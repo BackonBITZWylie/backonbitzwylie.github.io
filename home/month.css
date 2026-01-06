@@ -16,7 +16,7 @@
             }
             
             body{
-                background-color: snow;
+                background-color: white;
 
                 width : 100dvw;
                 height: 100dvh;
@@ -151,7 +151,7 @@
                 }
             }
             button {
-        background: snow;
+        background: white;
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -159,7 +159,7 @@
       }
 
       button:hover {
-        background: url(../pics/snow.gif);
+        background: url(../pics/fireworks.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -167,12 +167,13 @@
       }
       
       .dark body {
-        background: url(../pics/snow.gif);
-        color: black;
+        background: url(../pics/fireworks.gif);
+        color: white;
+        border-color: black;
       }
 
       .dark button {
-        background: url(../pics/snow.gif);
+        background: url(../pics/fireworks.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -180,7 +181,7 @@
       }
 
       .dark button:hover {
-        background: snow;
+        background: white;
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
