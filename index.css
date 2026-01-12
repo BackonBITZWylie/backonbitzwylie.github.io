@@ -64,7 +64,7 @@ p{
       }
 
       button:hover {
-        background: silver;
+        background: url(../backonbitzwylie.github.io/pics/test.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -72,12 +72,12 @@ p{
       }
       
       .dark body {
-        background: silver;
+        background: url(../backonbitzwylie.github.io/pics/test.gif);
         color: black;
       }
 
       .dark button {
-        background: silver;
+        background: url(../backonbitzwylie.github.io/pics/test.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;

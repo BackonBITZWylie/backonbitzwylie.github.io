@@ -82,7 +82,7 @@ button {
       }
 
       button:hover {
-        background: blueviolet;
+        background: url(./pics/what.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
@@ -90,12 +90,12 @@ button {
       }
       
       .dark body {
-        background: blueviolet;
+        background: url(./pics/what.gif);
         color: black;
       }
 
       .dark button {
-        background: blueviolet;
+        background: url(./pics/what.gif);
         color: black;
         border-radius: 1rem;
         border: solid 1px black;
