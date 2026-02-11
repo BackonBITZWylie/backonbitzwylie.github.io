@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Clicks</title>
+  </head>
+  <body>
+    <style>
+        body {
+            inset: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            cursor: crosshair
+        }
+
+    .redrec {
+        position: absolute;
+        width: 50px;
+        height: 25px;
+        background-color: red;
+        z-index: 100;
+    }
+    </style>
+    <script>
+      document.body.style.height = "100dvh"
+
+      let clicks = 0
+
+      function onClick() {
+        clicks = clicks + 1
+        console.log("Mouse was clicked", clicks, "times!")
+      }
+
+      document.body.onclick = onClick
+
+      document.addEventListener('click', function(event) {
+  const clickX = event.clientX;
+  const clickY = event.clientY;
+
+  const rect = document.createElement('div');
+
+  rect.classList.add('redrec');
+
+  rect.style.left = clickX + "px";
+  rect.style.top = clickY + "px";
+
+  document.body.appendChild(rect);
+});
+    </script>
+  </body>
+</html>

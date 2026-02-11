@@ -1,13 +1,90 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hello World</title>
+    <title>Your Own To-Do List</title>
+
+    <style>
+      body {
+        display         :   flex             ;
+        flex-direction  :   column           ;
+        align-items     :   center           ;
+        justify-content :   center           ;
+        min-height      :   100vh            ;
+        font-family     :   Arial, sans-serif;
+        background-color: darkgoldenrod    ;
+      }
+
+
+      ol {
+        padding: 0;
+        margin : 0;
+      }
+
+      li {
+        list-style-position: inside;
+        margin             : 0     ;
+      }
+
+      button.add-item {
+        margin-left: 6px    ;
+        cursor     : pointer;
+      }
+
+      button.theme-change {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button.theme-change:hover {
+        background: url(../pics/gb.gif);
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+      
+      .dark body {
+        background: url(../pics/gb.gif);
+        color: black;
+      }
+
+      .dark button.theme-change {
+        background: url(../pics/gb.gifs);
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark button.theme-change:hover {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .theme-change {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 95dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      
+    </style>
   </head>
+
   <body>
-    <h1>Todo List</h1>
+    <h1>Your Own To-Do List</h1>
     <ol id="todo"></ol>
     <input type="text" id="description">
-    <button id="add">Add Item</button>
+    <button class="theme-change">Toggle special mode</button>
+    <button id="add" class="add-item">Add Item</button>
 
     <script>
       const todo        = document.getElementById("todo")
@@ -15,28 +92,35 @@
       const description = document.getElementById("description")
 
       function newItem(desc) {
-        const li   = document.createElement("li")
-        const cb   = document.createElement("input")
-        const text = document.createElement("span")
-        const del  = document.createElement("button")
+        const li    = document.createElement("li")
+        const trash = document.createElement("button")
+        const text  = document.createElement("span")
+        const cross = document.createElement("button")
 
         function deleteItem() {
           todo.removeChild(li)
         }
 
-        del.onclick = deleteItem
-        cb.type = "checkbox"
+        function crossOutItem() {
+          if (text.style.textDecoration === "line-through") {
+            text.style.textDecoration = "none"
+          } else {
+            text.style.textDecoration = "line-through"
+          }
+        }
+
+        trash.innerText = "🗑️"
+        trash.onclick = deleteItem
+
         text.innerText = desc
 
-        cb.addEventListener("change", () => {
-          if (cb.checked) {
-            todo.removeChild(li)
-          }
-        })
+        cross.innerText = "Cross Out"
+        cross.onclick = crossOutItem
 
-        li.appendChild(cb)
+        li.appendChild(trash)
         li.appendChild(text)
-        li.appendChild(del)
+        li.appendChild(cross)
+
         return li
       }
 
@@ -49,6 +133,14 @@
       }
 
       add.onclick = addItem
+
+      const button = document.querySelector("button");
+
+      button.addEventListener("click", toggleDarkMode)
+
+      function toggleDarkMode() {
+        document.documentElement.classList.toggle("dark");
+      }
     </script>
   </body>
 </html>

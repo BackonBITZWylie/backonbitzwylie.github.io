@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Calculator</title>
+  </head>
+  <body>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        display: flex;
+        min-height: 100dvh;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #calculator {
+        display: grid;
+        width : fit-content;
+        height: fit-content;
+        grid-template-columns: repeat(4, 1fr);
+        gap: .15rem;
+      }
+
+      #calculator * {
+        width : 4rem;
+        height: 4rem;
+        font: 2rem monospace;
+
+        border-radius: .5rem;
+      }
+
+      #calculator button:hover {
+        background: lightblue;
+      }
+
+      #calculator #display {
+        grid-area: 1 / 1 / 1 / 5;
+        padding: .25rem;
+        text-align: right;
+        width: 100%;
+        box-sizing: border-box;
+        background: lightblue;
+        border: 2px solid black;
+      }
+
+
+      #calculator #go {
+        grid-column-start: 4;
+        grid-row-start: 4;
+        grid-row-end  : 6;
+        width : 100%;
+        height: 100%;
+      }
+    </style>
+
+    <div id="calculator">
+      <div id="display">0</div>
+
+      <button id="7">7</button>
+      <button id="8">8</button>
+      <button id="9">9</button>
+      <button id="sub">-</button>
+
+      <button id="4">4</button>
+      <button id="5">5</button>
+      <button id="6">6</button>
+      <button id="add">+</button>
+
+      <button id="1">1</button>
+      <button id="2">2</button>
+      <button id="3">3</button>
+      <button id="go">=</button>
+
+      <button id="c">C</button>
+      <button id="0">0</button>
+      <button id="dot">.</button>
+    </div>
+
+    <script>
+      const display = document.getElementById("display")
+      
+      const _0 = document.getElementById("0")
+      const _1 = document.getElementById("1")
+      const _2 = document.getElementById("2")
+      const _3 = document.getElementById("3")
+      const _4 = document.getElementById("4")
+      const _5 = document.getElementById("5")
+      const _6 = document.getElementById("6")
+      const _7 = document.getElementById("7")
+      const _8 = document.getElementById("8")
+      const _9 = document.getElementById("9")
+
+      const add = document.getElementById("add")
+      const sub = document.getElementById("sub")
+      const dot = document.getElementById("dot")
+      const go  = document.getElementById("go" )
+      const c   = document.getElementById("c"  )
+
+        // ----- Calculator state -----
+  let currentValue = "";
+  let previousValue = "";
+  let operator = "";
+
+  // ----- Helper function to update display -----
+  function updateDisplay(value) {
+    display.textContent = value || "0";
+  }
+
+  // ----- Number button handler -----
+  function handleNumber(num) {
+    currentValue += num;
+    updateDisplay(currentValue);
+  }
+
+  // ----- Operator handler -----
+  function handleOperator(op) {
+    if (currentValue === "") return;
+    previousValue = currentValue;
+    currentValue = "";
+    operator = op;
+  }
+
+  // ----- Equals handler -----
+  function calculate() {
+    if (previousValue === "" || currentValue === "") return;
+
+    const a = Number(previousValue);
+    const b = Number(currentValue);
+    let result = 0;
+
+    if (operator === "+") result = a + b;
+    if (operator === "-") result = a - b;
+
+    currentValue = result.toString();
+    previousValue = "";
+    operator = "";
+
+    updateDisplay(currentValue);
+  }
+
+  // ----- Clear handler -----
+  function clearCalculator() {
+    currentValue = "";
+    previousValue = "";
+    operator = "";
+    updateDisplay("0");
+  }
+
+  // ----- Event listeners for numbers -----
+  _0.addEventListener("click", () => handleNumber("0"));
+  _1.addEventListener("click", () => handleNumber("1"));
+  _2.addEventListener("click", () => handleNumber("2"));
+  _3.addEventListener("click", () => handleNumber("3"));
+  _4.addEventListener("click", () => handleNumber("4"));
+  _5.addEventListener("click", () => handleNumber("5"));
+  _6.addEventListener("click", () => handleNumber("6"));
+  _7.addEventListener("click", () => handleNumber("7"));
+  _8.addEventListener("click", () => handleNumber("8"));
+  _9.addEventListener("click", () => handleNumber("9"));
+
+  // ----- Other buttons -----
+  add.addEventListener("click", () => handleOperator("+"));
+  sub.addEventListener("click", () => handleOperator("-"));
+  go.addEventListener("click", calculate);
+  c.addEventListener("click", clearCalculator);
+
+  // ----- NEW: expression tracking -----
+let expression = "";
+
+// ----- Override display updates to show full expression -----
+function updateExpressionDisplay() {
+  display.textContent = expression || "0";
+}
+
+// ----- Updated number handler (adds to expression) -----
+function handleNumber(num) {
+  currentValue += num;
+  expression += num;
+  updateExpressionDisplay();
+}
+
+// ----- Updated operator handler -----
+function handleOperator(op) {
+  if (currentValue === "") return;
+
+  previousValue = currentValue;
+  currentValue = "";
+  operator = op;
+
+  expression += op;
+  updateExpressionDisplay();
+}
+
+// ----- Updated equals handler -----
+function calculate() {
+  if (previousValue === "" || currentValue === "") return;
+
+  const a = Number(previousValue);
+  const b = Number(currentValue);
+  let result = 0;
+
+  if (operator === "+") result = a + b;
+  if (operator === "-") result = a - b;
+
+  expression += "=" + result;
+
+  currentValue = result.toString();
+  previousValue = "";
+  operator = "";
+
+  updateExpressionDisplay();
+}
+
+// ----- Updated clear handler -----
+function clearCalculator() {
+  currentValue = "";
+  previousValue = "";
+  operator = "";
+  expression = "";
+  updateExpressionDisplay();
+}
+
+// ----- OVERRIDE equals behavior: show only the answer -----
+function calculate() {
+  if (previousValue === "" || currentValue === "") return;
+
+  const a = Number(previousValue);
+  const b = Number(currentValue);
+  let result = 0;
+
+  if (operator === "+") result = a + b;
+  if (operator === "-") result = a - b;
+
+  // Reset expression to ONLY the result
+  expression = result.toString();
+
+  currentValue = expression;
+  previousValue = "";
+  operator = "";
+
+  updateExpressionDisplay();
+}
+
+    </script>
+  </body>
+</html> 
