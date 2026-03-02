@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Press The Button</title>
+
+<style>
+    * {
+        inset: 0;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        color: black;
+        text-align: center;
+        background: url(./pics/fireworks.gif);
+    }
+
+    h1 {
+        margin-bottom: 10px;
+    }
+
+    #status {
+        margin-bottom: 25px;
+        font-size: 20px;
+    }
+
+    #rouletteBtn {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #6200ff;
+        color: white;
+        transition: transform 0.1s, background 0.2s;
+        box-shadow: 0 0 25px rgba(34, 0, 255, 0.6);
+    }
+
+    #rouletteBtn:hover {
+        transform: scale(1.05);
+        background: #00ff59;
+    }
+
+    #rouletteBtn:active {
+        transform: scale(0.95);
+    }
+
+    #restartBtn {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: none;
+        background: #1e90ff;
+        color: white;
+    }
+
+</style>
+</head>
+<body>
+
+<h1>Press The Button</h1>
+<div id="status">Player 1's turn</div>
+
+<button id="rouletteBtn">PRESS</button>
+<button id="restartBtn">Restart</button>
+
+<img id="rickroll" width="200" >
+
+<script>
+    const maxPresses = Math.floor(Math.random() * 8) + 3; 
+    // Random losing press between 3 and 10
+
+    let pressCount = 0;
+    let currentPlayer = 1;
+    const totalPlayers = 2;
+    let gameOver = false;
+
+    const button = document.getElementById("rouletteBtn");
+    const statusText = document.getElementById("status");
+    const restartBtn = document.getElementById("restartBtn");
+    const rickroll = document.getElementById("rickroll");
+
+    button.addEventListener("click", () => {
+        if (gameOver) return;
+
+        pressCount++;
+
+        if (pressCount === maxPresses) {
+            gameOver = true;
+            statusText.textContent = `Player ${currentPlayer} is the loser!`;
+            button.disabled = true;
+            playRickRoll();
+            restartBtn.style.display = "inline-block";
+        } else {
+            currentPlayer = currentPlayer === totalPlayers ? 1 : currentPlayer + 1;
+            statusText.textContent = `Player ${currentPlayer}'s turn`;
+        }
+    });
+
+    function playRickRoll() {
+        rickroll.src = "./pics/rickroll-roll.gif";
+        rickroll.style.display = "block";
+    }
+
+    restartBtn.addEventListener("click", () => {
+        location.reload();
+    });
+</script>
+
+</body>
+</html>

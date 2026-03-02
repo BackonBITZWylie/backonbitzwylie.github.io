@@ -1,0 +1,119 @@
+* {
+    inset:0;
+    margin:0;
+    padding:0;
+}
+
+.container {
+    width: 100dvw;
+    height: 100dvh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+
+h1 {
+    font-size: 64px;
+    font-weight: bold;
+    text-align: center;
+}
+
+p {
+font-style: italic;
+font-size: 24px;
+width: 900px;
+gap: 1rem;
+
+}
+
+.links {
+display: flex;
+flex-direction: row;
+align-items: center;
+gap: 1rem;
+font-size: 24px;
+flex-wrap: wrap;
+justify-content: space-evenly;
+border-radius: 100px;
+}
+
+.links a {
+background: black;
+color: white;
+border: 2px solid black;
+border-radius: 1rem;
+padding-left: 12px;
+padding-right: 12px;
+cursor: pointer;
+text-decoration: none;
+}
+
+.links a:hover{
+background: white;
+color: black;
+border: 2px solid black
+}
+
+body {
+    background-image: url("../pics/mii-sep.png");
+    background-repeat: no-repeat;
+    background-size: 75dvh;
+    background-position: center;
+}
+
+    button {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      button:hover {
+        background: darkgoldenrod;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+      
+      .dark body {
+        background: darkgoldenrod;
+        color: black;
+      }
+
+      .dark button {
+        background: darkgoldenrod;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark button:hover {
+        background: white;
+        color: black;
+        border-radius: 1rem;
+        border: solid 1px black;
+        outline: none;
+      }
+
+      .dark body image {
+        background-image: url("./pics/backon.svg");
+    background-repeat: no-repeat;
+    background-size: 50cap;
+      }
+
+      .place {
+        position: absolute;
+                transform-origin: right;
+                top: 0dvh;
+                left: 95dvw;
+                width: fit-content;
+                height:fit-content;
+      }
+      
