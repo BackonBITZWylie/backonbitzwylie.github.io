@@ -1,20 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Fight</title>
-<style>
-body { margin:0; font-family:sans-serif; background:#370c6e; color:white; display:flex; justify-content:center; align-items:center; height:100vh; }
-.screen { display:none; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; }
-.screen.active { display:flex; }
-button { padding:10px 20px; margin:10px; font-size:18px; cursor:pointer; }
-.box-container { display:flex; flex-wrap:wrap; justify-content:center; margin-top:20px; }
-.box { width:120px; height:50px; margin:10px; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:pointer; }
-.selected { border:4px solid gold; }
-canvas { border:3px solid white; background:black; }
-</style>
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Fight</title>
+    <style>
+      body { 
+        margin:0; 
+        font-family:sans-serif; 
+        background:#370c6e; 
+        color:black; 
+        display:flex; 
+        justify-content:center; 
+        align-items:center; 
+        height:100vh; 
+      }
+
+      .screen { 
+        display:none; 
+        flex-direction:column; 
+        align-items:center; 
+        justify-content:center; 
+        width:100%; 
+        height:100%;
+      }
+
+      .screen.active { 
+        display:flex; 
+      }
+
+      button { 
+        padding:10px 20px; 
+        margin:10px; 
+        font-size:18px; 
+        cursor:pointer; 
+      }
+
+      .box-container { 
+        display:flex; 
+        flex-wrap:wrap; 
+        justify-content:center; 
+        margin-top:20px; 
+      }
+
+      .box { 
+        width:120px; 
+        height:50px; 
+        margin:10px; 
+        display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        font-weight:bold; 
+        cursor:pointer; 
+      }
+
+      .selected { 
+        border:4px solid gold; 
+      }
+
+      canvas { 
+        border:3px solid white; 
+        background:black; 
+      }
+    </style>
+  </head>
 <body>
 
 <!-- MAIN MENU -->
@@ -49,105 +98,262 @@ canvas { border:3px solid white; background:black; }
 </div>
 
 <script>
-const maps=[
-  {name:'Computer', color:'#808080', hazardY:400},
-  {name:'Clouds', color:'#FFFFFF', hazardY:380},
-  {name:'Shop', color:'#A52A2A', hazardY:420},
-  {name:'Public', color:'#8B0000', hazardY:390},
-  {name:'Room', color:'#E0BFB8', hazardY:410},
-  {name:'Tree', color:'#228B22', hazardY:360},
-  {name:'Yard', color:'#F5F5DC', hazardY:400},
-  {name:'Work', color:'#1B1B1B', hazardY:400},
-  {name:'House', color:'#FFFDD0', hazardY:370},
-  {name:'Heaven', color:'#FF2400', hazardY:430}
-];
-const characters=[
-  {name:"The Creator", color:'silver'},
-  {name:"Pru", color:'green'},
-  {name:"Uncle R", color:'tan'},
-  {name:"Robe Guy", color:'purple'},
-  {name:"Sis", color:'cyan'},
-  {name:"Sunny", color:'orange'},
-  {name:"Winston", color:'#D2691E'},
-  {name:"Mom", color:'pink'},
-  {name:"Dad", color:'blue'},
-  {name:"God", color:'gold'}
-];
+  // what is hazardY?
+  const maps=[
+    {name:'Computer', color:'#808080', hazardY:400, image: "../fight game assets/computer.png"},
+    {name:'Clouds'  , color:'#FFFFFF', hazardY:380, image: "../fight game assets/clouds.png"},
+    {name:'Shop'    , color:'#A52A2A', hazardY:420, image: "../fight game assets/shop.png"},
+    {name:'Public'  , color:'#8B0000', hazardY:390, image: "../fight game assets/public.png"},
+    {name:'Room'    , color:'#E0BFB8', hazardY:410, image: "../fight game assets/room.png"},
+    {name:'Tree'    , color:'#228B22', hazardY:360, image: "../fight game assets/tree.png"},
+    {name:'Yard'    , color:'#F5F5DC', hazardY:400, image: "../fight game assets/yard.png"},
+    {name:'Work'    , color:'#1B1B1B', hazardY:400, image: "../fight game assets/work.png"},
+    {name:'House'   , color:'#FFFDD0', hazardY:370, image: "../fight game assets/home.png"},
+    {name:'Heaven'  , color:'#FF2400', hazardY:430, image: "../fight game assets/heavan.png"}
+  ];
 
-// SCREENS
-const mainMenu=document.getElementById('mainMenu');
-const mapSelectScreen=document.getElementById('mapSelectScreen');
-const charSelectScreen=document.getElementById('charSelectScreen');
-const gameScreen=document.getElementById('gameScreen');
-const charCanvas=document.getElementById('charCanvas');
-const charCtx=charCanvas.getContext('2d');
-const gameCanvas=document.getElementById('gameCanvas');
-const ctx=gameCanvas.getContext('2d');
+  const characters=[
+    {name:"The Creator", color:'silver' , image: "../fight game assets/the-creator.png"},
+    {name:"Pru"        , color:'green'  , image: "../fight game assets/pru.png"},
+    {name:"Uncle R"    , color:'tan'    , image: "../fight game assets/uncle-r.png"},
+    {name:"Robe Guy"   , color:'purple' , image: "../fight game assets/robe-guy.png"} ,
+    {name:"Sis"        , color:'cyan'   , image: "../fight game assets/sis.png"},
+    {name:"Sunny"      , color:'orange' , image: "../fight game assets/sunny.png"},
+    {name:"Winston"    , color:'#D2691E', image: "../fight game assets/winston.png"},
+    {name:"Mom"        , color:'pink'   , image: "../fight game assets/mom.png"},
+    {name:"Dad"        , color:'blue'   , image: "../fight game assets/dad.png"},
+    {name:"God"        , color:'gold'   , image: "../fight game assets/god.png"}
+  ];
 
-// UI
-const mapBoxesDiv=document.getElementById('mapBoxes');
-const mapNextBtn=document.getElementById('mapNextBtn');
-const confirmCharsBtn=document.getElementById('confirmCharsBtn');
-const p1Box=document.getElementById('p1Box');
-const p2Box=document.getElementById('p2Box');
+// main menu elements
+const mainMenu         = document.getElementById('mainMenu');
+
+// map select elements
+const mapSelectScreen  = document.getElementById('mapSelectScreen');
+const mapBoxesDiv      = document.getElementById('mapBoxes');
+const mapNextBtn       = document.getElementById('mapNextBtn');
+
+// character select elements
+const charSelectScreen = document.getElementById('charSelectScreen');
+const charCanvas       = document.getElementById('charCanvas');
+const confirmCharsBtn  = document.getElementById('confirmCharsBtn');
+const p1Box            = document.getElementById('p1Box');
+const p2Box            = document.getElementById('p2Box');
+const charCtx          = charCanvas.getContext('2d');
+
+// game screen elements
+const gameScreen       = document.getElementById('gameScreen');
+const gameCanvas       = document.getElementById('gameCanvas');
+const ctx              = gameCanvas.getContext('2d');
 
 // GAME STATE
-let gameMode='Stocks';
-let selectedMap=null;
-let selectedP1=null;
-let selectedP2=null;
-let gameRunning=false;
-let keys={};
-let gravity=1.2;
-let timeLimit=60;
-let timeElapsed=0;
+let gameMode    = 'Stocks';
+let selectedMap = null;
+let selectedP1  = null;
+let selectedP2  = null;
+let gameRunning = false;
+let keys        =  {}; // keyboard
+let gravity     = 1.2; // pixels per frame per frame
+let timeLimit   = 60; // seconds
+let timeElapsed =  0; // seconds
 
 // PLAYER CLASS
 class Player{
-  constructor(name,color,x,y,controls){
-    this.name=name; this.color=color; this.x=x; this.y=y;
-    this.width=50; this.height=50; this.vx=0; this.vy=0;
-    this.hp=100; this.controls=controls; this.onGround=false;
-    this.attackCooldown=0; this.specialCooldown=0;
-    this.stocks=3; this.invincible=0; this.kills=0;
+
+  constructor(name,color,image,x,y,controls){
+    this.name =name; 
+    this.color=color; 
+    this.x=x; // pixels
+    this.y=y; // pixels
+    this.width =50; 
+    this.height=50; 
+    this.vx=0; // pixels per frame
+    this.vy=0; // pixels per frame
+    this.hp=100; 
+    this.controls=controls; 
+    this.onGround=false;
+    this.attackCooldown =0; 
+    this.specialCooldown=0;
+    this.stocks=3; 
+    this.invincible=0; 
+    this.kills=0;
+
+    this.image = new Image()
+    this.image.src = image
   }
+
   update(){
-    if(keys[this.controls.left]) this.vx=-5;
-    else if(keys[this.controls.right]) this.vx=5;
-    else this.vx=0;
-    if(keys[this.controls.up] && this.onGround){ this.vy=-18; this.onGround=false; }
-    this.vy+=gravity; this.x+=this.vx; this.y+=this.vy;
-    if(this.y+this.height>selectedMap.hazardY){ this.y=selectedMap.hazardY-this.height; this.vy=0; this.onGround=true; }
+    // reset horizontal velocity
+    this.vx=0;
+    // move left
+    if(keys[this.controls.left ]) this.vx -= 5;
+    // move right
+    if(keys[this.controls.right]) this.vx += 5;
+    
+    // if pressing up AND on ground then jump
+    if(keys[this.controls.up] && this.onGround){ 
+      this.vy       = -18; 
+      this.onGround = false; 
+    }
 
+    // update position
+    this.vy += gravity; 
+    this.x  += this.vx; 
+    this.y  += this.vy;
+
+    // if y position is below the floor then "land"
+    if(this.y + this.height > selectedMap.hazardY){ 
+      this.y  = selectedMap.hazardY - this.height; 
+      this.vy = 0; 
+      this.onGround = true; 
+    }
+
+    // tick cooldowns
+    if (this.attackCooldown  > 0) this.attackCooldown  --
+    if (this.specialCooldown > 0) this.specialCooldown --
+
+    // if pressing attack AND attack is ready then
     if(keys[this.controls.attack] && this.attackCooldown<=0){
-      if(this===player1 && hit({x:this.x+this.width,y:this.y,width:20,height:this.height},player2)) player2.takeDamage(10);
-      if(this===player2 && hit({x:this.x-20,y:this.y,width:20,height:this.height},player1)) player1.takeDamage(10);
+      // calculate damage zones
+      const leftAttack  = {
+        x     : this.x - 20,
+        y     : this.y     ,
+        width :          20,
+        height: this.height
+      }
+
+      const rightAttack = {
+        x     : this.x + this.width,
+        y     : this.y             ,
+        width : 20,
+        height: this.height
+      }
+
+      // if i am p1 AND (my left zone is overlapping p2 OR my right zone is overlapping p2) then do damage to p2
+      if(this === player1 && (hit(player2, leftAttack) || hit(player2, rightAttack)))
+        player2.takeDamage(10)
+
+      // if i am p2 AND (my left zone is overlapping p1 or my right zone is overlapping p1) then do damage to p1
+      if (this === player2 && (hit(player1, leftAttack) || hit(player1, rightAttack)))
+        player1.takeDamage(10)
+
+      // increment attack cooldown
       this.attackCooldown=20;
-    } else if(this.attackCooldown>0) this.attackCooldown--;
+    }
 
+    // if pressing special AND special is ready then
     if(keys[this.controls.special] && this.specialCooldown<=0){
-      if(this===player1 && hit({x:this.x+this.width,y:this.y-20,width:70,height:70},player2)) player2.takeDamage(25);
-      if(this===player2 && hit({x:this.x-70,y:this.y-20,width:70,height:70},player1)) player1.takeDamage(25);
-      this.specialCooldown=180;
-    } else if(this.specialCooldown>0) this.specialCooldown--;
+      // calculate damage zones
+      const leftSpecial  = {
+        x     : this.x - 70,
+        y     : this.y     ,
+        width :          70,
+        height: this.height
+      }
 
-    if(this.x+this.width<0||this.x>gameCanvas.width||this.y>gameCanvas.height||this.y+this.height<0) this.loseStock();
-    if(this.invincible>0) this.invincible--;
+      const rightSpecial = {
+        x     : this.x + this.width,
+        y     : this.y             ,
+        width : 70,
+        height: this.height
+      }
+
+      // if i am p1 AND (my left zone is overlapping p2 OR my right zone is overlapping p2) then do damage to p2
+      if(this === player1 && (hit(player2, leftSpecial) || hit(player2, rightSpecial)))
+        player2.takeDamage(10)
+
+      // if i am p2 AND (my left zone is overlapping p1 or my right zone is overlapping p1) then do damage to p1
+      if (this === player2 && (hit(player1, leftSpecial) || hit(player1, rightSpecial)))
+        player1.takeDamage(10)
+
+      // increment attack cooldown
+      this.specialCooldown=180;
+    }
+
+    // if i am out of bounds then lose a stock
+    if(
+      this.x + this.width  < 0 || this.x > gameCanvas.width || 
+      this.y + this.height < 0 || this.y > gameCanvas.height 
+    ) this.loseStock();
+    
+    if(this.invincible > 0) 
+      this.invincible--;
   }
-  takeDamage(amount){ if(this.invincible>0) return; this.hp-=amount; if(this.hp<=0) this.loseStock(); }
+
+  takeDamage(amount){ 
+    // if i am invincible ignore the damage
+    if(this.invincible > 0) 
+      return; 
+
+    // decrement hp
+    this.hp -= amount; 
+
+    // if hp is less than zero then lose a stock
+    if(this.hp <= 0) 
+      this.loseStock(); 
+  }
+
   loseStock(){
-    if(gameMode==='Stocks'){
+    // if gameMode is stocks then lose one stock
+    if(gameMode === 'Stocks'){
       this.stocks--;
-      if(this.stocks>0){ this.hp=100; this.x=this===player1?100:750; this.y=300; this.vx=0; this.vy=0; this.invincible=120; }
-      else { gameRunning=false; showEndScreen(this===player1?player2:player1); }
-    } else if(gameMode==='Time'){
-      if(this===player1) player2.kills++; else player1.kills++;
-      this.hp=100; this.x=this===player1?100:750; this.y=300; this.vx=0; this.vy=0; this.invincible=120;
+      // if i have stocks remaining then reset, else end the game
+      if(this.stocks > 0){ 
+        // reset hp
+        this.hp = 100; 
+        // reset position
+        this.x  = this===player1 ? 100 : 750; 
+        this.y  = 300; 
+        // reset velocity
+        this.vx = 0; 
+        this.vy = 0; 
+        // become invincible for 120 frames
+        this.invincible = 120; 
+      } else { 
+        gameRunning = false; 
+        showEndScreen(this===player1 ? player2 : player1); 
+      }
+    // if gameMode is time then increment kills and reset
+    } else if(gameMode==='Time') {
+      // if i am p1 increment p2 kills
+      if(this===player1) player2.kills++; 
+      // if i am p2 increment p1 kills
+      else               player1.kills++;
+
+      // reset hp
+      this.hp = 100; 
+      // reset position
+      this.x  = this===player1 ? 100 : 750; 
+      this.y  = 300; 
+      // reset velocity
+      this.vx = 0; 
+      this.vy = 0; 
+      // become invincible for 120 frames
+      this.invincible = 120; 
     }
   }
-  draw(){ ctx.fillStyle=(this.invincible>0)?'white':this.color; ctx.fillRect(this.x,this.y,this.width,this.height); }
+  draw(){
+    // draw default color rectangle (in case image isn't loaded)
+    ctx.fillStyle = this.color
+    ctx.fillRect(this.x,this.y,this.width,this.height); 
+
+    // draw image
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+
+    // draw white rectangle if we are invincible
+    if (this.invincible > 0) {
+      ctx.fillStyle = "white"
+      ctx.fillRect(this.x,this.y,this.width,this.height); }
+    }
 }
-function hit(a,b){ return a.x<b.x+b.width && a.x+a.width>b.x && a.y<b.y+b.height && a.y+a.height>b.y; }
+
+// check if two boxes {x, y, width, height } are overlapping
+function hit(a,b){ 
+  return (
+    a.x < b.x + b.width  && a.x + a.width  > b.x && 
+    a.y < b.y + b.height && a.y + a.height > b.y
+  ); 
+}
 
 document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
@@ -168,6 +374,8 @@ function drawMapBoxes(){
     div.classList.add('box'); div.style.background=map.color; div.innerText=map.name;
     div.onclick=()=>{
       selectedMap=map;
+      selectedMap.texture=new Image()
+      selectedMap.texture.src = selectedMap.image
       document.querySelectorAll('#mapBoxes .box').forEach(b=>b.classList.remove('selected'));
       div.classList.add('selected');
     };
@@ -224,13 +432,30 @@ let player1=null,player2=null;
 function startGame(){
   timeElapsed=0;
   const stocks=3;
-  player1=new Player(selectedP1.name,selectedP1.color,100,300,{left:'a',right:'d',up:'w',attack:'f',special:'g'});
-  player2=new Player(selectedP2.name,selectedP2.color,750,300,{left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',attack:'l',special:'k'});
+  player1=new Player(selectedP1.name,selectedP1.color, selectedP1.image,100,300,{left:'a',right:'d',up:'w',attack:'f',special:'g'});
+  player2=new Player(selectedP2.name,selectedP2.color, selectedP2.image, 750,300,{left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',attack:'l',special:'k'});
   player1.stocks=stocks; player2.stocks=stocks; player1.kills=0; player2.kills=0;
   gameRunning=true; requestAnimationFrame(gameLoop);
 }
 
-function drawMap(){ ctx.fillStyle=selectedMap.color; ctx.fillRect(0,0,gameCanvas.width,gameCanvas.height); ctx.fillStyle='darkred'; ctx.fillRect(0,selectedMap.hazardY,gameCanvas.width,gameCanvas.height-selectedMap.hazardY); ctx.fillStyle='white'; ctx.font='20px sans-serif'; ctx.fillText(`Map: ${selectedMap.name}`,10,30); }
+function drawMap(){ 
+  // draw the background color
+  ctx.fillStyle=selectedMap.color; 
+  ctx.fillRect(0,0,gameCanvas.width,gameCanvas.height); 
+
+  // draw the background image 
+  ctx.drawImage(selectedMap.texture, 0, 0, gameCanvas.width, gameCanvas.height)
+
+  // draw the hazard zone?
+  ctx.fillStyle='darkred'; 
+  ctx.fillRect(0,selectedMap.hazardY,gameCanvas.width,gameCanvas.height-selectedMap.hazardY); 
+
+  // draw the map name
+  ctx.fillStyle='white'; 
+  ctx.font='20px sans-serif'; 
+  ctx.fillText(`Map: ${selectedMap.name}`,10,30);
+}
+
 function drawHUD(){ ctx.fillStyle='red'; ctx.fillRect(50,10,player1.hp*2,20); ctx.fillRect(650,10,player2.hp*2,20); ctx.fillStyle='white'; if(gameMode==='Stocks'){ ctx.fillText(`Stocks: ${player1.stocks}`,50,50); ctx.fillText(`Stocks: ${player2.stocks}`,650,50);} else if(gameMode==='Time'){ const timeLeft=Math.max(0,timeLimit-timeElapsed); ctx.fillText(`Time: ${Math.ceil(timeLeft)}s`,380,30); ctx.fillText(`${player1.name} KOs: ${player1.kills}`,50,50); ctx.fillText(`${player2.name} KOs: ${player2.kills}`,650,50); } }
 
 function showEndScreen(winner){
