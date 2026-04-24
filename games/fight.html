@@ -100,16 +100,16 @@
 <script>
   // what is hazardY?
   const maps=[
-    {name:'Computer', color:'#808080', hazardY:400, image: "../fight game assets/computer.png"},
-    {name:'Clouds'  , color:'#FFFFFF', hazardY:380, image: "../fight game assets/clouds.png"},
-    {name:'Shop'    , color:'#A52A2A', hazardY:420, image: "../fight game assets/shop.png"},
-    {name:'Public'  , color:'#8B0000', hazardY:390, image: "../fight game assets/public.png"},
-    {name:'Room'    , color:'#E0BFB8', hazardY:410, image: "../fight game assets/room.png"},
-    {name:'Tree'    , color:'#228B22', hazardY:360, image: "../fight game assets/tree.png"},
-    {name:'Yard'    , color:'#F5F5DC', hazardY:400, image: "../fight game assets/yard.png"},
-    {name:'Work'    , color:'#1B1B1B', hazardY:400, image: "../fight game assets/work.png"},
-    {name:'House'   , color:'#FFFDD0', hazardY:370, image: "../fight game assets/home.png"},
-    {name:'Heaven'  , color:'#FF2400', hazardY:430, image: "../fight game assets/heavan.png"}
+    {name:'Computer', color:'#808080', hazardY:400, image: "../fight game assets/computer.png", platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Clouds'  , color:'#FFFFFF', hazardY:380, image: "../fight game assets/clouds.png"  , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Shop'    , color:'#A52A2A', hazardY:420, image: "../fight game assets/shop.png"    , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Public'  , color:'#8B0000', hazardY:390, image: "../fight game assets/public.png"  , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Room'    , color:'#E0BFB8', hazardY:410, image: "../fight game assets/room.png"    , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Tree'    , color:'#228B22', hazardY:360, image: "../fight game assets/tree.png"    , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Yard'    , color:'#F5F5DC', hazardY:400, image: "../fight game assets/yard.png"    , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Work'    , color:'#1B1B1B', hazardY:400, image: "../fight game assets/work.png"    , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'House'   , color:'#FFFDD0', hazardY:370, image: "../fight game assets/home.png"    , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]},
+    {name:'Heaven'  , color:'#FF2400', hazardY:430, image: "../fight game assets/heavan.png"  , platforms: [{x: 450 - 125, y: 200, width: 250, height: 30}, {x:100, y: 300, width: 250, height:30}, {x:550, y: 300, width: 250, height:30}]}
   ];
 
   const characters=[
@@ -192,7 +192,7 @@ class Player{
     
     // if pressing up AND on ground then jump
     if(keys[this.controls.up] && this.onGround){ 
-      this.vy       = -18; 
+      this.vy       = -19; 
       this.onGround = false; 
     }
 
@@ -200,6 +200,26 @@ class Player{
     this.vy += gravity; 
     this.x  += this.vx; 
     this.y  += this.vy;
+
+    if (this.vy > 0)
+      for (const platform of selectedMap.platforms) {
+        // if we hit the platform
+        if (hit(this, platform)) {
+          // rewind y position by one frame
+          this.y -= this.vy
+
+          // if we aren't touching the platform then don't fall through
+          if (!hit(this, platform)) {
+            this.y = platform.y - this.height
+            this.vy = 0
+            this.onGround = true;
+            break;
+          } else {
+            // reset y position (ignore rewind)
+            this.y += this.vy
+          }
+        }
+      }
 
     // if y position is below the floor then "land"
     if(this.y + this.height > selectedMap.hazardY){ 
@@ -447,8 +467,13 @@ function drawMap(){
   ctx.drawImage(selectedMap.texture, 0, 0, gameCanvas.width, gameCanvas.height)
 
   // draw the hazard zone?
-  ctx.fillStyle='darkred'; 
+  ctx.fillStyle=selectedMap.color; 
   ctx.fillRect(0,selectedMap.hazardY,gameCanvas.width,gameCanvas.height-selectedMap.hazardY); 
+
+  // draw the platforms
+  for (const platform of selectedMap.platforms) {
+    ctx.fillRect(platform.x, platform.y, platform.width, platform.height)
+  }
 
   // draw the map name
   ctx.fillStyle='white'; 
